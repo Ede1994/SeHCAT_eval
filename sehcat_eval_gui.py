@@ -89,7 +89,7 @@ eric.einspaenner@med.ovgu.de'''
     T.insert(tk.END, quote)
 
 
-# calculation button for one energy window
+#%% calculation button for one energy window
 def buttonCalculate_1():
     # get the values
 
@@ -159,72 +159,138 @@ def buttonCalculate_1():
     label_areaRetention.config(text=str(retention))
 
 
-# calculation button for two energy window
+#%% calculation button for two energy window
 def buttonCalculate_2():
     # get the values
 
 	# background 0d
-    background_0d = entry_background_0d_2.get()
-    if background_0d == '':
+    background_0d_window1 = entry_background_0d_window1.get()
+    if background_0d_window1 == '':
 	    tk.messagebox.showerror(
             "Kein Hintergrund",
             "Fehler: Kein Hintergrund 0d!"
         )
     else:
-	    background_0d = float(background_0d) * 10**3
+	    background_0d_window1 = float(background_0d_window1) * 10**3
 
 	# background 7d
-    background_7d = entry_background_7d_2.get()
-    if background_7d == '':
+    background_7d_window1 = entry_background_7d_window1.get()
+    if background_7d_window1 == '':
 	    tk.messagebox.showerror(
             "Kein Hintergrund",
             "Fehler: Kein Hintergrund 7d!"
         )
     else:
-	    background_7d = float(background_7d) * 10**3
+	    background_7d_window1 = float(background_7d_window1) * 10**3
 
-	# Ant 0d
-    ant_counts_0d = entry_ant_counts_0d_2.get()
-    if ant_counts_0d == '':
+    # window 2
+    background_0d_window2 = entry_background_0d_window2.get()
+    if background_0d_window2 == '':
 	    tk.messagebox.showerror(
-            "Missing Ant counts",
-            "Error: No ant counts 0d!"
+            "Kein Hintergrund",
+            "Fehler: Kein Hintergrund 0d!"
         )
     else:
-	    ant_counts_0d = float(ant_counts_0d) * 10**3
+	    background_0d_window2 = float(background_0d_window2) * 10**3
+
+	# background 7d
+    background_7d_window2 = entry_background_7d_window2.get()
+    if background_7d_window2 == '':
+	    tk.messagebox.showerror(
+            "Kein Hintergrund",
+            "Fehler: Kein Hintergrund 7d!"
+        )
+    else:
+	    background_7d_window2 = float(background_7d_window2) * 10**3
+
+    # window 1
+	# Ant 0d
+    ant_counts_0d_window1 = entry_ant_counts_0d_window1.get()
+    if ant_counts_0d_window1 == '':
+	    tk.messagebox.showerror(
+            "Keine Ant counts",
+            "Fehler: Keine ant counts 0d für 1-Energiefenster!"
+        )
+    else:
+	    ant_counts_0d_window1 = float(ant_counts_0d_window1) * 10**3
 
 	# Post 0d
-    post_counts_0d = entry_post_counts_0d_2.get()
-    if post_counts_0d == '':
+    post_counts_0d_window1 = entry_post_counts_0d_window1.get()
+    if post_counts_0d_window1 == '':
 	    tk.messagebox.showerror(
-            "Missing Post counts",
-            "Error: No post counts 0d!"
+            "Keine Post counts",
+            "Fehler: Keine post counts 0d für 1-Energiefenster!"
         )
     else:
-	    post_counts_0d = float(post_counts_0d) * 10**3
+	    post_counts_0d_window1 = float(post_counts_0d_window1) * 10**3
 
 	# Ant 7d
-    ant_counts_7d = entry_ant_counts_7d_2.get()
-    if ant_counts_7d == '':
+    ant_counts_7d_window1 = entry_ant_counts_7d_window1.get()
+    if ant_counts_7d_window1 == '':
 	    tk.messagebox.showerror(
-            "Missing Ant counts",
-            "Error: No ant counts 7d!"
+            "Keine Ant counts",
+            "Fehler: Keine ant counts 7d für 1-Energiefenster!"
         )
     else:
-	    ant_counts_7d = float(ant_counts_7d) * 10**3
+	    ant_counts_7d_window1 = float(ant_counts_7d_window1) * 10**3
 
 	# Post 7d
-    post_counts_7d = entry_post_counts_7d_2.get()
-    if post_counts_7d == '':
+    post_counts_7d_window1 = entry_post_counts_7d_window1.get()
+    if post_counts_7d_window1 == '':
 	    tk.messagebox.showerror(
-            "Missing Post counts",
-            "Error: No post counts 7d!"
+            "Keine Post counts",
+            "Fehler: Keine post counts 7d für 1-Energiefenster!"
         )
     else:
-	    post_counts_7d = float(post_counts_7d) * 10**3
+	    post_counts_7d_window1 = float(post_counts_7d_window1) * 10**3
 
-    retention = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d)*(post_counts_7d - background_7d))/np.sqrt((ant_counts_0d - background_0d)*(post_counts_0d - background_0d))) * 100., 2)
+    # window 2
+	# Ant 0d
+    ant_counts_0d_window2 = entry_ant_counts_0d_window2.get()
+    if ant_counts_0d_window2 == '':
+	    tk.messagebox.showerror(
+            "Keine Ant counts",
+            "Fehler: Keine ant counts 0d für 2-Energiefenster!"
+        )
+    else:
+	    ant_counts_0d_window2 = float(ant_counts_0d_window2) * 10**3
 
+	# Post 0d
+    post_counts_0d_window2 = entry_post_counts_0d_window2.get()
+    if post_counts_0d_window2 == '':
+	    tk.messagebox.showerror(
+            "Keine Post counts",
+            "Fehler: Keine post counts 0d für 2-Energiefenster!"
+        )
+    else:
+	    post_counts_0d_window2 = float(post_counts_0d_window2) * 10**3
+
+	# Ant 7d
+    ant_counts_7d_window2 = entry_ant_counts_7d_window2.get()
+    if ant_counts_7d_window2 == '':
+	    tk.messagebox.showerror(
+            "Keine Ant counts",
+            "Fehler: Keine ant counts 7d für 2-Energiefenster!"
+        )
+    else:
+	    ant_counts_7d_window2 = float(ant_counts_7d_window2) * 10**3
+
+	# Post 7d
+    post_counts_7d_window2 = entry_post_counts_7d_window2.get()
+    if post_counts_7d_window2 == '':
+	    tk.messagebox.showerror(
+            "Keine Post counts",
+            "Fehler: Keine post counts 7d für 2-Energiefenster!"
+        )
+    else:
+	    post_counts_7d_window2 = float(post_counts_7d_window2) * 10**3
+
+    # retention = (window1 + window2)/2 (round -> .00)
+    # retention = round(decay_factor * ((np.sqrt((ant_counts_7d_window1 - background_7d_window1)*(post_counts_7d_window1 - background_7d_window1))/np.sqrt((ant_counts_0d_window1 - background_0d_window1)*(post_counts_0d_window1 - background_0d_window1))) \
+    #                   + (np.sqrt((ant_counts_7d_window2 - background_7d_window2)*(post_counts_7d_window2 - background_7d_window2))/np.sqrt((ant_counts_0d_window2 - background_0d_window2)*(post_counts_0d_window2 - background_0d_window2)))) / 2 * 100., 2)
+    retention = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_window1 - background_7d_window2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_window1 - background_7d_window2))) \
+                      / np.sqrt((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_window1 - background_7d_window2)*(post_counts_0d_window1 + post_counts_7d_window2 - background_0d_window1 - background_7d_window2)) * 100., 2)
+    
     # results; add in label areas
     label_areaRetention_2.config(text=str(retention))
 
@@ -233,7 +299,7 @@ def buttonCalculate_2():
 # start GUI
 root = tk.Tk()
 root.title("SeHCAT - Auswertung")
-root.geometry("600x550")
+root.geometry("710x550")
 
 # define menu
 menubar = tk.Menu(root)
@@ -284,7 +350,7 @@ entry_post_counts_0d = tk.Entry(group_1)
 entry_post_counts_0d.grid(row=1, column=4)
 
 # 7 days
-label_ant_counts_7d = tk.Label(group_1, text="Ant 7d [kcts]").grid(row=2)
+label_ant_counts_7d = tk.Label(group_1, text="Ant 7d [kcts]:").grid(row=2)
 label_post_counts_7d = tk.Label(group_1, text="Post 7d [kcts]:").grid(row=2, column=3)
 
 entry_ant_counts_7d = tk.Entry(group_1)
@@ -311,58 +377,67 @@ group_2.grid(padx=10, pady=5, sticky='w' + 'e')
 group_2b = tk.LabelFrame(group_2, padx=15, pady=10, text="Hintergrund")
 group_2b.grid(padx=10, pady=5, sticky='w' + 'e')
 
-label_background_0d_2 = tk.Label(group_2b, text="Hintergrund 0d [kcts]:").grid(row=0)
-label_background_7d_2 = tk.Label(group_2b, text="Hintergrund 7d [kcts]:").grid(row=0, column=3)
+label_background_0d_window1 = tk.Label(group_2b, text="Hintergrund 0d [kcts]:").grid(row=0)
+label_background_7d_window1 = tk.Label(group_2b, text="Hintergrund 7d [kcts]:").grid(row=0, column=3)
 
-entry_background_0d_2 = tk.Entry(group_2b)
-entry_background_0d_2.grid(row=0, column=1)
+entry_background_0d_window1 = tk.Entry(group_2b)
+entry_background_0d_window1.grid(row=0, column=1)
 
-entry_background_7d_2 = tk.Entry(group_2b)
-entry_background_7d_2.grid(row=0, column=4)
+entry_background_7d_window1 = tk.Entry(group_2b)
+entry_background_7d_window1.grid(row=0, column=4)
+
+label_background_0d_window2 = tk.Label(group_2b, text="Hintergrund 0d [kcts]:").grid(row=1)
+label_background_7d_window2 = tk.Label(group_2b, text="Hintergrund 7d [kcts]:").grid(row=1, column=3)
+
+entry_background_0d_window2 = tk.Entry(group_2b)
+entry_background_0d_window2.grid(row=1, column=1)
+
+entry_background_7d_window2 = tk.Entry(group_2b)
+entry_background_7d_window2.grid(row=1, column=4)
 
 # energy window 1
 group_21 = tk.LabelFrame(group_2, padx=15, pady=10, text="1. Energiefenster")
 group_21.grid(padx=10, pady=5, sticky='w' + 'e')
 
 label_ant_counts_0d_window1 = tk.Label(group_21, text="Ant 0d [kcts]:").grid(row=1)
-label_post_counts_0d_window1 = tk.Label(group_21, text="Post 0d [kcts]:").grid(row=1, column=3)
+label_post_counts_0d_window1 = tk.Label(group_21, text="Post 0d [kcts]:").grid(row=1, column=3, padx=26)
 
 label_ant_counts_7d_window1 = tk.Label(group_21, text="Ant 7d [kcts]:").grid(row=2)
-label_post_counts_7d_window1 = tk.Label(group_21, text="Post 7d [kcts]:").grid(row=2, column=3)
+label_post_counts_7d_window1 = tk.Label(group_21, text="Post 7d [kcts]:").grid(row=2, column=3, padx=26)
 
 entry_ant_counts_0d_window1 = tk.Entry(group_21)
-entry_ant_counts_0d_window1.grid(row=1, column=1)
+entry_ant_counts_0d_window1.grid(row=1, column=1, padx=10)
 
 entry_post_counts_0d_window1 = tk.Entry(group_21)
-entry_post_counts_0d_window1.grid(row=1, column=4)
+entry_post_counts_0d_window1.grid(row=1, column=4, padx=15)
 
 entry_ant_counts_7d_window1 = tk.Entry(group_21)
-entry_ant_counts_7d_window1.grid(row=2, column=1)
+entry_ant_counts_7d_window1.grid(row=2, column=1, padx=10)
 
 entry_post_counts_7d_window1 = tk.Entry(group_21)
-entry_post_counts_7d_window1.grid(row=2, column=4)
+entry_post_counts_7d_window1.grid(row=2, column=4, padx=15)
 
 # energy window 2
 group_22 = tk.LabelFrame(group_2, padx=15, pady=10, text="2. Energiefenster")
 group_22.grid(padx=10, pady=5, sticky='w' + 'e')
 
 label_ant_counts_0d_window2 = tk.Label(group_22, text="Ant 0d [kcts]:").grid(row=1)
-label_post_counts_0d_window2 = tk.Label(group_22, text="Post 0d [kcts]:").grid(row=1, column=3)
+label_post_counts_0d_window2 = tk.Label(group_22, text="Post 0d [kcts]:").grid(row=1, column=3, padx=26)
 
 label_ant_counts_7d_window2 = tk.Label(group_22, text="Ant 7d [kcts]:").grid(row=2)
-label_post_counts_7d_window2 = tk.Label(group_22, text="Post 7d [kcts]:").grid(row=2, column=3)
+label_post_counts_7d_window2 = tk.Label(group_22, text="Post 7d [kcts]:").grid(row=2, column=3, padx=26)
 
 entry_ant_counts_0d_window2 = tk.Entry(group_22)
-entry_ant_counts_0d_window2.grid(row=1, column=1)
+entry_ant_counts_0d_window2.grid(row=1, column=1, padx=10)
 
 entry_post_counts_0d_window2 = tk.Entry(group_22)
-entry_post_counts_0d_window2.grid(row=1, column=4)
+entry_post_counts_0d_window2.grid(row=1, column=4, padx=15)
 
 entry_ant_counts_7d_window2 = tk.Entry(group_22)
-entry_ant_counts_7d_window2.grid(row=2, column=1)
+entry_ant_counts_7d_window2.grid(row=2, column=1, padx=10)
 
 entry_post_counts_7d_window2 = tk.Entry(group_22)
-entry_post_counts_7d_window2.grid(row=2, column=4)
+entry_post_counts_7d_window2.grid(row=2, column=4, padx=15)
 
 # retention
 group_2r = tk.LabelFrame(group_2, padx=15, pady=10, text="Retention")
@@ -370,11 +445,11 @@ group_2r.grid(padx=10, pady=5, sticky='w' + 'e')
 
 label_retention_2 = tk.Label(group_2r, text="Tag 7 Retention [%]:").grid(row=4)
 label_areaRetention_2 = tk.Label(group_2r, bg='gray', width='12', text="")
-label_areaRetention_2.grid(row=4, column=1)
+label_areaRetention_2.grid(row=4, column=1, padx=10)
 
 # define button position
 buttonCalculate_2 = tk.Button(group_2r, text='Berechnen!', width='10', bg='red', command=buttonCalculate_2)
-buttonCalculate_2.grid(row=4, column=3, padx=100, pady=5)
+buttonCalculate_2.grid(row=4, column=3, padx=150, pady=5)
 
 
 #%% main
