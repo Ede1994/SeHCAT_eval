@@ -10,12 +10,25 @@ This program is free software.
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 
+import os
 import numpy as np
 
-#%% constants
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+#%% constants and memory
 
 decay_factor = 1.04
+
+
+patdata = {'Name': 0,                     #name     
+          'Birthday': 0,                  #date of birth
+	      'Retention 1-Fenster [%]': 0,   #retention_1w[%]
+	      'Retention 2-Fenster [%]': 0,   #retention_2w[%] 
+	      'Applied Activity [MBq]': 0,    #applied activity [MBq]
+	      }
 
 #%% buttons for GUI
 # functions: GUI
@@ -38,8 +51,10 @@ def delete_entries():
     entry_ant_counts_7d.delete(0, tk.END)
     entry_post_counts_7d.delete(0, tk.END)
     
-    entry_background_0d_2.delete(0, tk.END)
-    entry_background_7d_2.delete(0, tk.END)
+    entry_background_0d_window1.delete(0, tk.END)
+    entry_background_7d_window1.delete(0, tk.END)
+    entry_background_0d_window2.delete(0, tk.END)
+    entry_background_7d_window2.delete(0, tk.END)
     entry_ant_counts_0d_window1.delete(0, tk.END)
     entry_post_counts_0d_window1.delete(0, tk.END)
     entry_ant_counts_7d_window1.delete(0, tk.END)
@@ -88,6 +103,69 @@ This program is free software.
 eric.einspaenner@med.ovgu.de'''
     T.insert(tk.END, quote)
 
+
+def SaveData():    
+    # open dialog
+    file = filedialog.asksaveasfile(title="Save As...", filetypes=[("All files", "*.*")])
+
+    #  asksaveasfile return `None` if dialog closed with "cancel". 
+    if file is None:
+        return
+
+    # extract filename as str
+    filename = str(file.name)
+    
+    file.close()
+    
+    #create pdf File and define settings
+    save = canvas.Canvas(filename + '.pdf', pagesize=letter)
+    save.setLineWidth(.3)
+    save.setFont('Helvetica', 12)
+
+    
+    # pdf header
+    save.drawString(30,750, 'Universitätsmedizin Magdeburg')
+    save.drawString(30,735, 'Klinik für Radiologie und Nuklearmedizin')
+    save.drawString(440,750, "Datum:")
+    save.line(480,747,580,747)
+    
+    save.drawString(30,700,'Protokoll für SeHCAT Evaluierung')
+    save.line(30,698,580,698)
+
+    # patient infos
+    save.drawString(30,680, '1. Messung:')
+    save.drawString(320,680, '2. Messung:')
+  
+    save.drawString(30,630, 'Patienteninformationen:')
+    
+    save.drawString(30,610, 'Name:')
+    save.drawString(320,610, 'Geburtsdatum:')
+
+    save.drawString(30,585, 'appl. Aktivität [MBq]:')
+    save.drawString(320,585, 'App.-zeitpunkt:')
+
+    save.line(30,567,580,567)
+    
+    # results
+    save.drawString(30,550, 'Ergebnis 1-Energiefenster:')
+    save.drawString(30,530, 'Retention [%]:')
+    save.drawString(150,530, str(patdata['Retention 1-Fenster [%]']))
+
+    save.drawString(350,550, 'Ergebnis 2-Energiefenster:')
+    save.drawString(350,530, 'Retention [%]:')
+    save.drawString(470,530, str(patdata['Retention 2-Fenster [%]']))
+    
+    # sgn area
+    save.drawString(30,480, "Unterschrift MPE:")
+    save.line(125,477,320,477)
+
+
+    # save pdf file
+    save.showPage()
+    save.save()
+    
+    # remove tmp files
+    os.remove(filename)
 
 #%% calculation button for one energy window
 def buttonCalculate_1():
@@ -153,10 +231,11 @@ def buttonCalculate_1():
     else:
 	    post_counts_7d = float(post_counts_7d) * 10**3
 
-    retention = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d)*(post_counts_7d - background_7d))/np.sqrt((ant_counts_0d - background_0d)*(post_counts_0d - background_0d))) * 100., 2)
+    retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d)*(post_counts_7d - background_7d))/np.sqrt((ant_counts_0d - background_0d)*(post_counts_0d - background_0d))) * 100., 2)
 
     # results; add in label areas
-    label_areaRetention.config(text=str(retention))
+    label_areaRetention.config(text=str(retention_1w))
+    patdata['Retention 1-Fenster [%]'] = retention_1w
 
 
 #%% calculation button for two energy window
@@ -288,11 +367,12 @@ def buttonCalculate_2():
     # retention = (window1 + window2)/2 (round -> .00)
     # retention = round(decay_factor * ((np.sqrt((ant_counts_7d_window1 - background_7d_window1)*(post_counts_7d_window1 - background_7d_window1))/np.sqrt((ant_counts_0d_window1 - background_0d_window1)*(post_counts_0d_window1 - background_0d_window1))) \
     #                   + (np.sqrt((ant_counts_7d_window2 - background_7d_window2)*(post_counts_7d_window2 - background_7d_window2))/np.sqrt((ant_counts_0d_window2 - background_0d_window2)*(post_counts_0d_window2 - background_0d_window2)))) / 2 * 100., 2)
-    retention = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_window1 - background_7d_window2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_window1 - background_7d_window2))) \
+    retention_2w = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_window1 - background_7d_window2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_window1 - background_7d_window2))) \
                       / np.sqrt((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_window1 - background_7d_window2)*(post_counts_0d_window1 + post_counts_7d_window2 - background_0d_window1 - background_7d_window2)) * 100., 2)
     
     # results; add in label areas
-    label_areaRetention_2.config(text=str(retention))
+    label_areaRetention_2.config(text=str(retention_2w))
+    patdata['Retention 2-Fenster [%]'] = retention_2w
 
 
 #%% GUI
@@ -306,7 +386,7 @@ menubar = tk.Menu(root)
 
 # file menu
 filemenu = tk.Menu(menubar, tearoff=0)
-filemenu.add_command(label="Speichern als...", command=donothing)
+filemenu.add_command(label="Speichern als...", command=SaveData)
 filemenu.add_separator()
 filemenu.add_command(label="Verlassen", command=root.quit)
 menubar.add_cascade(label="File", menu=filemenu)
