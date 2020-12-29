@@ -34,8 +34,10 @@ patdata = {'Name': 0,                     #name
 
 # delete all entries (entry boxes)
 def delete_entries():
-    entry_background_0d.delete(0, tk.END)
-    entry_background_7d.delete(0, tk.END)
+    entry_background_0d_ant.delete(0, tk.END)
+    entry_background_7d_ant.delete(0, tk.END)
+    entry_background_0d_post.delete(0, tk.END)
+    entry_background_7d_post.delete(0, tk.END)
     entry_ant_counts_0d.delete(0, tk.END)
     entry_post_counts_0d.delete(0, tk.END)
     entry_ant_counts_7d.delete(0, tk.END)
@@ -164,25 +166,45 @@ def SaveData():
 
 def buttonCalculate_1():
     # get values
-	# background 0d
-    background_0d = entry_background_0d.get()
-    if background_0d == '':
+	# background ant 0d
+    background_0d_ant = entry_background_0d_ant.get()
+    if background_0d_ant == '':
 	    tk.messagebox.showerror(
             "Kein Hintergrund",
             "Fehler: Kein Hintergrund 0d!"
         )
     else:
-	    background_0d = float(background_0d) * 10**3
+	    background_0d_ant = float(background_0d_ant) * 10**3
 
-	# background 7d
-    background_7d = entry_background_7d.get()
-    if background_7d == '':
+	# background ant 7d
+    background_7d_ant = entry_background_7d_ant.get()
+    if background_7d_ant == '':
 	    tk.messagebox.showerror(
             "Kein Hintergrund",
             "Fehler: Kein Hintergrund 7d!"
         )
     else:
-	    background_7d = float(background_7d) * 10**3
+	    background_7d_ant = float(background_7d_ant) * 10**3
+
+	# background post 0d
+    background_0d_post = entry_background_0d_post.get()
+    if background_0d_post == '':
+	    tk.messagebox.showerror(
+            "Kein Hintergrund",
+            "Fehler: Kein Hintergrund 0d!"
+        )
+    else:
+	    background_0d_post = float(background_0d_post) * 10**3
+
+	# background post 7d
+    background_7d_post = entry_background_7d_post.get()
+    if background_7d_post == '':
+	    tk.messagebox.showerror(
+            "Kein Hintergrund",
+            "Fehler: Kein Hintergrund 7d!"
+        )
+    else:
+	    background_7d_post = float(background_7d_post) * 10**3
 
 	# Ant 0d
     ant_counts_0d = entry_ant_counts_0d.get()
@@ -224,10 +246,11 @@ def buttonCalculate_1():
     else:
 	    post_counts_7d = float(post_counts_7d) * 10**3
 
-    retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d)*(post_counts_7d - background_7d))/np.sqrt((ant_counts_0d - background_0d)*(post_counts_0d - background_0d))) * 100., 2)
+    retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d_ant)*(post_counts_7d - background_7d_post)) \
+                                         / np.sqrt((ant_counts_0d - background_0d_ant)*(post_counts_0d - background_0d_post))) * 100., 2)
 
     # results; add in label areas
-    label_areaRetention.config(text=str(retention_1w))
+    label_areaRetention_1.config(text=str(retention_1w))
     patdata['Retention 1-Fenster [%]'] = retention_1w
 
 
@@ -370,7 +393,7 @@ def buttonCalculate_2():
 # start GUI
 root = tk.Tk()
 root.title("SeHCAT - Auswertung")
-root.geometry("730x555")
+root.geometry("730x730")
 
 # define menu
 menubar = tk.Menu(root)
@@ -400,44 +423,63 @@ root.config(menu=menubar)
 group_1 = tk.LabelFrame(root, padx=15, pady=10, text="1-Energiefenster")
 group_1.grid(padx=10, pady=5, sticky='w' + 'e')
 
-# background
-label_background_0d = tk.Label(group_1, text="BG 0d [kcts]:").grid(row=0)
-label_background_7d = tk.Label(group_1, text="BG 7d [kcts]:").grid(row=0, column=3, padx=35)
+# background group
+group_1b = tk.LabelFrame(group_1, padx=15, pady=10, text="Hintergrund")
+group_1b.grid(padx=10, pady=5, sticky='w' + 'e')
 
-entry_background_0d = tk.Entry(group_1)
-entry_background_0d.grid(row=0, column=1)
+label_background_0d_ant = tk.Label(group_1b, text="BG 0d ant [kcts]:").grid(row=0)
+label_background_0d_post = tk.Label(group_1b, text="BG 0d post [kcts]:").grid(row=0, column=3, padx=26)
 
-entry_background_7d = tk.Entry(group_1)
-entry_background_7d.grid(row=0, column=4)
+entry_background_0d_ant = tk.Entry(group_1b)
+entry_background_0d_ant.grid(row=0, column=1, padx=15)
+
+entry_background_0d_post = tk.Entry(group_1b)
+entry_background_0d_post.grid(row=0, column=4, padx=15)
+
+label_background_7d_ant = tk.Label(group_1b, text="BG 7d ant [kcts]:").grid(row=1)
+label_background_7d_post = tk.Label(group_1b, text="BG 7d post [kcts]:").grid(row=1, column=3, padx=26)
+
+entry_background_7d_ant = tk.Entry(group_1b)
+entry_background_7d_ant.grid(row=1, column=1, padx=15)
+
+entry_background_7d_post = tk.Entry(group_1b)
+entry_background_7d_post.grid(row=1, column=4, padx=15)
+
+# 0 and 7 days group
+group_11 = tk.LabelFrame(group_1, padx=15, pady=10, text="Counts")
+group_11.grid(padx=10, pady=5, sticky='w' + 'e')
 
 # 0 days
-label_ant_counts_0d = tk.Label(group_1, text="Ant 0d [kcts]:").grid(row=1)
-label_post_counts_0d = tk.Label(group_1, text="Post 0d [kcts]:").grid(row=1, column=3, padx=35)
+label_ant_counts_0d = tk.Label(group_11, text="Ant 0d [kcts]:").grid(row=1)
+label_post_counts_0d = tk.Label(group_11, text="Post 0d [kcts]:").grid(row=1, column=3, padx=26)
 
-entry_ant_counts_0d = tk.Entry(group_1)
-entry_ant_counts_0d.grid(row=1, column=1)
+entry_ant_counts_0d = tk.Entry(group_11)
+entry_ant_counts_0d.grid(row=1, column=1, padx=10)
 
-entry_post_counts_0d = tk.Entry(group_1)
-entry_post_counts_0d.grid(row=1, column=4)
+entry_post_counts_0d = tk.Entry(group_11)
+entry_post_counts_0d.grid(row=1, column=4, padx=15)
 
 # 7 days
-label_ant_counts_7d = tk.Label(group_1, text="Ant 7d [kcts]:").grid(row=2)
-label_post_counts_7d = tk.Label(group_1, text="Post 7d [kcts]:").grid(row=2, column=3, padx=35)
+label_ant_counts_7d = tk.Label(group_11, text="Ant 7d [kcts]:").grid(row=2)
+label_post_counts_7d = tk.Label(group_11, text="Post 7d [kcts]:").grid(row=2, column=3, padx=26)
 
-entry_ant_counts_7d = tk.Entry(group_1)
-entry_ant_counts_7d.grid(row=2, column=1)
+entry_ant_counts_7d = tk.Entry(group_11)
+entry_ant_counts_7d.grid(row=2, column=1, padx=10)
 
-entry_post_counts_7d = tk.Entry(group_1)
-entry_post_counts_7d.grid(row=2, column=4)
+entry_post_counts_7d = tk.Entry(group_11)
+entry_post_counts_7d.grid(row=2, column=4, padx=15)
 
-# retention
-label_retention = tk.Label(group_1, text="Tag 7 Retention [%]:").grid(row=4)
-label_areaRetention = tk.Label(group_1, bg='gray', width='12', text="")
-label_areaRetention.grid(row=4, column=1, padx=10)
+# retention group
+group_1r = tk.LabelFrame(group_1, padx=15, pady=10, text="Retention")
+group_1r.grid(padx=10, pady=5, sticky='w' + 'e')
+
+label_retention_1 = tk.Label(group_1r, text="Tag 7 Retention [%]:").grid(row=4)
+label_areaRetention_1 = tk.Label(group_1r, bg='gray', width='12', text="")
+label_areaRetention_1.grid(row=4, column=1, padx=10)
 
 # define button position
-buttonCalculate = tk.Button(group_1, text='Berechnen!', width='10', bg='red', command=buttonCalculate_1)
-buttonCalculate.grid(row=4, column=4, padx=28, pady=5)
+buttonCalculate_1 = tk.Button(group_1r, text='Berechnen!', width='10', bg='red', command=buttonCalculate_1)
+buttonCalculate_1.grid(row=4, column=3, padx=160, pady=5)
 
 
 #%% two energy windows
