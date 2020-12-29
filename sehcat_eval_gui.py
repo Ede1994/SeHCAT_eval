@@ -9,7 +9,6 @@ This program is free software.
 """
 
 import tkinter as tk
-from tkinter import ttk
 from tkinter import filedialog
 
 import os
@@ -30,17 +29,8 @@ patdata = {'Name': 0,                     #name
 	      'Applied Activity [MBq]': 0,    #applied activity [MBq]
 	      }
 
+
 #%% buttons for GUI
-# functions: GUI
-
-# do nothing button
-def donothing():
-    filewin = tk.Toplevel(root)
-    button = tk.Button(filewin,
-                       text="Do nothing button"
-                       )
-    button.pack()
-
 
 # delete all entries (entry boxes)
 def delete_entries():
@@ -65,7 +55,7 @@ def delete_entries():
     entry_post_counts_7d_window2.delete(0, tk.END)
 
 
-# text for impressum button
+# text for help button
 def helpButton():
     filewin = tk.Toplevel(root)
     filewin.title("Help")
@@ -76,7 +66,7 @@ def helpButton():
     S.config(command=T.yview)
     T.config(yscrollcommand=S.set)
     quote= '''Alle Felder entsprechend ausfüllen. Beachte: Angaben in kilo-Counts [kcts]!
-Durch betätigen des 'Berechnen!'-Buttons wird die Retention nach 7 Tagen in % ausgegeben!
+Durch das Betätigen des 'Berechnen!'-Buttons wird die Retention nach 7 Tagen in % ausgegeben!
 1-Energiefenster: Diese Eingabemaske benutzen, wenn nur EIN Energiefenster für die WB genutzt wurde.
 2-Energiefenster: Diese Eingabemaske benutzen, wenn nur ZWEI Energiefenster für die WB genutzt wurde.
 
@@ -99,11 +89,13 @@ def impressum():
     S.config(command=T.yview)
     T.config(yscrollcommand=S.set)
     quote= '''Author: Eric Einspänner (Clinic for Radiology and Nuclear Medicine, UMMD Magdeburg (Germany))
-This program is free software.
-eric.einspaenner@med.ovgu.de'''
+Contact: eric.einspaenner@med.ovgu.de
+GitHub:
+
+This program is free software.'''
     T.insert(tk.END, quote)
 
-
+# save button; pdf printout
 def SaveData():    
     # open dialog
     file = filedialog.asksaveasfile(title="Save As...", filetypes=[("All files", "*.*")])
@@ -167,10 +159,11 @@ def SaveData():
     # remove tmp files
     os.remove(filename)
 
-#%% calculation button for one energy window
-def buttonCalculate_1():
-    # get the values
 
+#%% calculation button for one energy window
+
+def buttonCalculate_1():
+    # get values
 	# background 0d
     background_0d = entry_background_0d.get()
     if background_0d == '':
@@ -239,9 +232,9 @@ def buttonCalculate_1():
 
 
 #%% calculation button for two energy window
-def buttonCalculate_2():
-    # get the values
 
+def buttonCalculate_2():
+    # get values
 	# background 0d
     background_0d_window1 = entry_background_0d_window1.get()
     if background_0d_window1 == '':
@@ -365,8 +358,6 @@ def buttonCalculate_2():
 	    post_counts_7d_window2 = float(post_counts_7d_window2) * 10**3
 
     # retention = (window1 + window2)/2 (round -> .00)
-    # retention = round(decay_factor * ((np.sqrt((ant_counts_7d_window1 - background_7d_window1)*(post_counts_7d_window1 - background_7d_window1))/np.sqrt((ant_counts_0d_window1 - background_0d_window1)*(post_counts_0d_window1 - background_0d_window1))) \
-    #                   + (np.sqrt((ant_counts_7d_window2 - background_7d_window2)*(post_counts_7d_window2 - background_7d_window2))/np.sqrt((ant_counts_0d_window2 - background_0d_window2)*(post_counts_0d_window2 - background_0d_window2)))) / 2 * 100., 2)
     retention_2w = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_window1 - background_7d_window2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_window1 - background_7d_window2))) \
                       / np.sqrt((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_window1 - background_7d_window2)*(post_counts_0d_window1 + post_counts_7d_window2 - background_0d_window1 - background_7d_window2)) * 100., 2)
     
