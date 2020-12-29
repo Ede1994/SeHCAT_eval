@@ -370,7 +370,7 @@ def buttonCalculate_2():
 # start GUI
 root = tk.Tk()
 root.title("SeHCAT - Auswertung")
-root.geometry("710x550")
+root.geometry("730x555")
 
 # define menu
 menubar = tk.Menu(root)
@@ -401,8 +401,8 @@ group_1 = tk.LabelFrame(root, padx=15, pady=10, text="1-Energiefenster")
 group_1.grid(padx=10, pady=5, sticky='w' + 'e')
 
 # background
-label_background_0d = tk.Label(group_1, text="Hintergrund 0d [kcts]:").grid(row=0)
-label_background_7d = tk.Label(group_1, text="Hintergrund 7d [kcts]:").grid(row=0, column=3)
+label_background_0d = tk.Label(group_1, text="BG 0d [kcts]:").grid(row=0)
+label_background_7d = tk.Label(group_1, text="BG 7d [kcts]:").grid(row=0, column=3, padx=35)
 
 entry_background_0d = tk.Entry(group_1)
 entry_background_0d.grid(row=0, column=1)
@@ -412,7 +412,7 @@ entry_background_7d.grid(row=0, column=4)
 
 # 0 days
 label_ant_counts_0d = tk.Label(group_1, text="Ant 0d [kcts]:").grid(row=1)
-label_post_counts_0d = tk.Label(group_1, text="Post 0d [kcts]:").grid(row=1, column=3)
+label_post_counts_0d = tk.Label(group_1, text="Post 0d [kcts]:").grid(row=1, column=3, padx=35)
 
 entry_ant_counts_0d = tk.Entry(group_1)
 entry_ant_counts_0d.grid(row=1, column=1)
@@ -422,7 +422,7 @@ entry_post_counts_0d.grid(row=1, column=4)
 
 # 7 days
 label_ant_counts_7d = tk.Label(group_1, text="Ant 7d [kcts]:").grid(row=2)
-label_post_counts_7d = tk.Label(group_1, text="Post 7d [kcts]:").grid(row=2, column=3)
+label_post_counts_7d = tk.Label(group_1, text="Post 7d [kcts]:").grid(row=2, column=3, padx=35)
 
 entry_ant_counts_7d = tk.Entry(group_1)
 entry_ant_counts_7d.grid(row=2, column=1)
@@ -433,11 +433,11 @@ entry_post_counts_7d.grid(row=2, column=4)
 # retention
 label_retention = tk.Label(group_1, text="Tag 7 Retention [%]:").grid(row=4)
 label_areaRetention = tk.Label(group_1, bg='gray', width='12', text="")
-label_areaRetention.grid(row=4, column=1)
+label_areaRetention.grid(row=4, column=1, padx=10)
 
 # define button position
 buttonCalculate = tk.Button(group_1, text='Berechnen!', width='10', bg='red', command=buttonCalculate_1)
-buttonCalculate.grid(row=4, column=4, padx='5', pady='5')
+buttonCalculate.grid(row=4, column=4, padx=28, pady=5)
 
 
 #%% two energy windows
@@ -448,23 +448,23 @@ group_2.grid(padx=10, pady=5, sticky='w' + 'e')
 group_2b = tk.LabelFrame(group_2, padx=15, pady=10, text="Hintergrund")
 group_2b.grid(padx=10, pady=5, sticky='w' + 'e')
 
-label_background_0d_window1 = tk.Label(group_2b, text="Hintergrund 0d [kcts]:").grid(row=0)
-label_background_7d_window1 = tk.Label(group_2b, text="Hintergrund 7d [kcts]:").grid(row=0, column=3)
+label_background_0d_window1 = tk.Label(group_2b, text="BG 0d [kcts]:").grid(row=0)
+label_background_7d_window1 = tk.Label(group_2b, text="BG 7d [kcts]:").grid(row=0, column=3, padx=26)
 
 entry_background_0d_window1 = tk.Entry(group_2b)
-entry_background_0d_window1.grid(row=0, column=1)
+entry_background_0d_window1.grid(row=0, column=1, padx=15)
 
 entry_background_7d_window1 = tk.Entry(group_2b)
-entry_background_7d_window1.grid(row=0, column=4)
+entry_background_7d_window1.grid(row=0, column=4, padx=15)
 
-label_background_0d_window2 = tk.Label(group_2b, text="Hintergrund 0d [kcts]:").grid(row=1)
-label_background_7d_window2 = tk.Label(group_2b, text="Hintergrund 7d [kcts]:").grid(row=1, column=3)
+label_background_0d_window2 = tk.Label(group_2b, text="BG 0d [kcts]:").grid(row=1)
+label_background_7d_window2 = tk.Label(group_2b, text="BG 7d [kcts]:").grid(row=1, column=3, padx=26)
 
 entry_background_0d_window2 = tk.Entry(group_2b)
-entry_background_0d_window2.grid(row=1, column=1)
+entry_background_0d_window2.grid(row=1, column=1, padx=15)
 
 entry_background_7d_window2 = tk.Entry(group_2b)
-entry_background_7d_window2.grid(row=1, column=4)
+entry_background_7d_window2.grid(row=1, column=4, padx=15)
 
 # energy window 1
 group_21 = tk.LabelFrame(group_2, padx=15, pady=10, text="1. Energiefenster")
@@ -520,7 +520,7 @@ label_areaRetention_2.grid(row=4, column=1, padx=10)
 
 # define button position
 buttonCalculate_2 = tk.Button(group_2r, text='Berechnen!', width='10', bg='red', command=buttonCalculate_2)
-buttonCalculate_2.grid(row=4, column=3, padx=150, pady=5)
+buttonCalculate_2.grid(row=4, column=3, padx=160, pady=5)
 
 
 #%% main
