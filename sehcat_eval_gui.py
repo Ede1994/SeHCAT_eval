@@ -22,11 +22,12 @@ from reportlab.pdfgen import canvas
 decay_factor = 1.04
 
 
-patdata = {'Name': 0,                     #name     
-          'Birthday': 0,                  #date of birth
-	      'Retention 1-Fenster [%]': 0,   #retention_1w[%]
-	      'Retention 2-Fenster [%]': 0,   #retention_2w[%] 
-	      'Applied Activity [MBq]': 0,    #applied activity [MBq]
+patdata = {'Name': 0, 
+          'Birthday': 0,
+	      'Applied Activity [MBq]': 0,
+          'Application Date': 0,
+	      'Retention 1-Fenster [%]': 0,
+	      'Retention 2-Fenster [%]': 0 
 	      }
 
 
@@ -71,7 +72,7 @@ def helpButton():
     T.pack(side=tk.LEFT, fill=tk.Y)
     S.config(command=T.yview)
     T.config(yscrollcommand=S.set)
-    quote= '''Alle Felder entsprechend ausfüllen. Beachte: Angaben in kilo-Counts [kcts]!
+    quote= '''Alle Felder entsprechend ausfüllen. Achtung: Angaben in kilo-Counts [kcts]!
 Durch das Betätigen des 'Berechnen!'-Buttons wird die Retention nach 7 Tagen in % ausgegeben!
 1-Energiefenster: Diese Eingabemaske benutzen, wenn nur EIN Energiefenster für die WB genutzt wurde.
 2-Energiefenster: Diese Eingabemaske benutzen, wenn nur ZWEI Energiefenster für die WB genutzt wurde.
@@ -115,6 +116,11 @@ def SaveData():
     
     file.close()
     
+    patdata['Name'] = entry_patname.get()
+    patdata['Birthday'] = entry_patbirth.get()
+    patdata['Applied Activity [MBq]'] = entry_patactivity.get()
+    patdata['Application Date'] = entry_patactdate.get()
+    
     #create pdf File and define settings
     save = canvas.Canvas(filename + '.pdf', pagesize=letter)
     save.setLineWidth(.3)
@@ -137,10 +143,14 @@ def SaveData():
     save.drawString(30,630, 'Patienteninformationen:')
     
     save.drawString(30,610, 'Name:')
+    save.drawString(100,610, str(patdata['Name']))
     save.drawString(320,610, 'Geburtsdatum:')
+    save.drawString(420,610, str(patdata['Birthday']))
 
     save.drawString(30,585, 'appl. Aktivität [MBq]:')
+    save.drawString(150,585, str(patdata['Applied Activity [MBq]']))
     save.drawString(320,585, 'App.-zeitpunkt:')
+    save.drawString(420,585, str(patdata['Application Date']))
 
     save.line(30,567,580,567)
     
@@ -437,7 +447,7 @@ def buttonCalculate_2():
 # start GUI
 root = tk.Tk()
 root.title("SeHCAT - Auswertung")
-root.geometry("730x870")
+root.geometry("1920x1200")
 
 # define menu
 menubar = tk.Menu(root)
@@ -463,11 +473,34 @@ menubar.add_cascade(label="Hilfe", menu=helpmenu)
 root.config(menu=menubar)
 
 
+#%% patient data
+# positions
+
+group_patient = tk.LabelFrame(root, padx=15, pady=10, text="Patientendaten")
+group_patient.grid(row=0, column=0, padx=10, pady=5, sticky='w' + 'e')
+
+label_patname = tk.Label(group_patient, text="Name:").grid(row=0)
+entry_patname = tk.Entry(group_patient)
+entry_patname.grid(row=0, column=1, padx=15)
+
+label_patbirth = tk.Label(group_patient, text="Geburtsdatum:").grid(row=1)
+entry_patbirth = tk.Entry(group_patient)
+entry_patbirth.grid(row=1, column=1, padx=15)
+
+label_patactivity = tk.Label(group_patient, text="appl. Aktivität [MBq]:").grid(row=2)
+entry_patactivity = tk.Entry(group_patient)
+entry_patactivity.grid(row=2, column=1, padx=15)
+
+label_patactdate = tk.Label(group_patient, text="App.-zeitpunkt:").grid(row=3)
+entry_patactdate = tk.Entry(group_patient)
+entry_patactdate.grid(row=3, column=1, padx=15)
+
+
 #%% one energy window
 # positions
 
 group_1 = tk.LabelFrame(root, padx=15, pady=10, text="1-Energiefenster")
-group_1.grid(padx=10, pady=5, sticky='w' + 'e')
+group_1.grid(row=0, column=1, padx=10, pady=5, sticky='w' + 'e')
 
 # background group
 group_1b = tk.LabelFrame(group_1, padx=15, pady=10, text="Hintergrund")
@@ -532,7 +565,7 @@ buttonCalculate_1.grid(row=0, column=3, padx=160, pady=5)
 # positions
 
 group_2 = tk.LabelFrame(root, padx=15, pady=10, text="2-Energiefenster")
-group_2.grid(padx=10, pady=5, sticky='w' + 'e')
+group_2.grid(row=1, column=1, padx=10, pady=5, sticky='w' + 'e')
 
 # background
 group_2b = tk.LabelFrame(group_2, padx=15, pady=10, text="Hintergrund")
