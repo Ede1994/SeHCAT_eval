@@ -13,23 +13,58 @@ from tkinter import filedialog
 
 import os
 import numpy as np
+import math
 
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+
 #%% constants and memory
 
 decay_factor = 1.04
+T_75se = 118. # days
 
 
-patdata = {'Name': 0, 
-          'Birthday': 0,
-	      'Applied Activity [MBq]': 0,
-          'Application Date': 0,
-	      'Retention 1-Fenster [%]': 0,
-	      'Retention 2-Fenster [%]': 0 
+patdata = {'Name': "-", 
+          'Birthday': "-",
+	      'Applied Activity [kBq]': "-",
+          'Application Date': "-",
+	      'Retention 1-Fenster [%]': "-",
+	      'Retention 2-Fenster [%]': "-",
+          '1st Measurement': "-",
+          '2nd Measurement': "-"
 	      }
 
+tlist = [0,1,2,3,4,5,6,7,8]
+
+fig = Figure(figsize=(4, 6), dpi=60)
+ax1 = fig.add_subplot(2,1,1)
+ax2 = fig.add_subplot(2,1,2)
+
+def decay_equation(a0,T,t):
+	# A = A0 * e^(- λ * t)
+	a = int(a0 * math.exp(-math.log(2)/T * t))
+	return a
+
+def retention_lists(counts_0d):
+    retention_10 = []
+    retention_15 = []
+    dt = 0.0
+    dt_list = []
+    factor1 = 1.
+    factor2 = 1.
+    while dt <= 8.0:
+        x = decay_equation(counts_0d, T_75se, dt)*factor1
+        factor1 -= factor1*0.15
+        y = decay_equation(counts_0d, T_75se, dt)*factor2
+        factor2 -= factor2*0.125
+        retention_10.append(x)
+        retention_15.append(y)
+        dt_list.append(dt)
+        dt += 0.5
+    return dt_list, retention_10, retention_15
 
 #%% buttons for GUI
 
@@ -119,7 +154,8 @@ def SaveData():
     patdata['Name'] = entry_patname.get()
     patdata['Birthday'] = entry_patbirth.get()
     patdata['Applied Activity [MBq]'] = entry_patactivity.get()
-    patdata['Application Date'] = entry_patactdate.get()
+    patdata['1st Measurement'] = entry_pat_date_1st.get()
+    patdata['2nd Measurement'] = entry_pat_date_2nd.get()
     
     #create pdf File and define settings
     save = canvas.Canvas(filename + '.pdf', pagesize=letter)
@@ -138,7 +174,9 @@ def SaveData():
 
     # patient infos
     save.drawString(30,680, '1. Messung:')
+    save.drawString(100,680, str(patdata['1st Measurement']))
     save.drawString(320,680, '2. Messung:')
+    save.drawString(390,680, str(patdata['2nd Measurement']))
   
     save.drawString(30,630, 'Patienteninformationen:')
     
@@ -148,7 +186,7 @@ def SaveData():
     save.drawString(420,610, str(patdata['Birthday']))
 
     save.drawString(30,585, 'appl. Aktivität [MBq]:')
-    save.drawString(150,585, str(patdata['Applied Activity [MBq]']))
+    save.drawString(150,585, str(patdata['Applied Activity [kBq]']))
     save.drawString(320,585, 'App.-zeitpunkt:')
     save.drawString(420,585, str(patdata['Application Date']))
 
@@ -262,17 +300,55 @@ def buttonCalculate_1():
 
     retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d_ant)*(post_counts_7d - background_7d_post)) \
                                          / np.sqrt((ant_counts_0d - background_0d_ant)*(post_counts_0d - background_0d_post))) * 100., 2)
+    
+    counts_0d = ((ant_counts_0d - background_0d_ant) + (post_counts_0d - background_0d_post)) / 2.
+    counts_7d = ((ant_counts_7d - background_7d_ant)  + (post_counts_7d - background_7d_post)) / 2.
+    
+    dt_list, retention_10, retention_15 = retention_lists(counts_0d)
 
     # results; add in label areas
     label_areaRetention_1.config(text=str(retention_1w))
     patdata['Retention 1-Fenster [%]'] = retention_1w
+    
+    # plot
+    ax1.clear()
+    ax2.clear()
+    
+    #ax1.set_title('kcts vs Tagen')
+    ax1.plot(0, counts_0d, 'o', label='kcts 0d')
+    ax1.plot(7, counts_7d, 'o', label='kcts 7d')
+    ax1.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
+    ax1.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
+    ax1.set_ylabel('kcts')
+    ax1.set_xlabel('Tagen')
+    ax1.legend()
+    
+    ax2.plot(dt_list, retention_10, label='Retention = 10%')
+    ax2.plot(dt_list, retention_15, label='Retention = 15%')
+    ax2.plot(7., counts_7d, 'o')
+    ax2.annotate('Retention',
+            xy=(dt_list[-3], retention_1w),
+            )
+    ax2.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
+    ax2.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
+    ax2.set_ylabel('kcts')
+    ax2.set_xlabel('Tagen')
+    ax2.legend()
+    
+    canvas = FigureCanvasTkAgg(fig, master=root)
+    canvas.draw()
+    canvas.get_tk_widget().grid(row=0, column=2, rowspan=2, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
+    
+    toolbarFrame = tk.Frame(master=root)
+    toolbarFrame.grid(row=3, column=2, columnspan=3)
+    toolbar = NavigationToolbar2Tk(canvas, toolbarFrame)
 
 
 #%% calculation button for two energy window
 
 def buttonCalculate_2():
     # get values
-	# background ant 0d w1
+	# background ant 0d w2
     background_0d_ant_w1 = entry_background_0d_ant_w1.get()
     if background_0d_ant_w1 == '':
 	    tk.messagebox.showerror(
@@ -282,7 +358,7 @@ def buttonCalculate_2():
     else:
 	    background_0d_ant_w1 = float(background_0d_ant_w1) * 10**3
 
-	# background 0d post w1
+	# background 0d post w2
     background_0d_post_w1 = entry_background_0d_post_w1.get()
     if background_0d_post_w1 == '':
 	    tk.messagebox.showerror(
@@ -292,7 +368,7 @@ def buttonCalculate_2():
     else:
 	    background_0d_post_w1 = float(background_0d_post_w1) * 10**3
 
-    # background ant 7d w1
+    # background ant 7d w2
     background_7d_ant_w1 = entry_background_7d_ant_w1.get()
     if background_7d_ant_w1 == '':
 	    tk.messagebox.showerror(
@@ -302,7 +378,7 @@ def buttonCalculate_2():
     else:
 	    background_7d_ant_w1 = float(background_7d_ant_w1) * 10**3
 
-	# background post 7d w1
+	# background post 7d w2
     background_7d_post_w1 = entry_background_7d_post_w1.get()
     if background_7d_post_w1 == '':
 	    tk.messagebox.showerror(
@@ -494,6 +570,19 @@ entry_patactivity.grid(row=2, column=1, padx=15)
 label_patactdate = tk.Label(group_patient, text="App.-zeitpunkt:").grid(row=3)
 entry_patactdate = tk.Entry(group_patient)
 entry_patactdate.grid(row=3, column=1, padx=15)
+
+label_pat_date_1st = tk.Label(group_patient, text="1. Messung:").grid(row=4)
+entry_pat_date_1st = tk.Entry(group_patient)
+entry_pat_date_1st.grid(row=4, column=1, padx=15)
+
+label_pat_date_2nd = tk.Label(group_patient, text="2. Messung:").grid(row=5)
+entry_pat_date_2nd = tk.Entry(group_patient)
+entry_pat_date_2nd.grid(row=5, column=1, padx=15)
+
+#%% plot area
+# position
+plot_frame = tk.Frame(width=500, height=400, bg="grey", colormap="new")
+plot_frame.grid(row=0, column=2, rowspan=2, columnspan=3, sticky=tk.W + tk.E + tk.N + tk.S, padx=1, pady=1)
 
 
 #%% one energy window
