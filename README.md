@@ -9,7 +9,7 @@
 
 
 # Introduction
-SeHCAT_eval is a Open Source software that calculates the retention in % from the measurement data of a whole-body SPECT with one or two energy windows. The results are saved as pdf.
+SeHCAT_eval is a open-source software that calculates the retention in % from the measurement data of a whole-body SPECT with one or two energy windows. The results are saved as pdf.
 
 The basic calculations can be found in [CalculationBases](/CalculationBases).
 
@@ -21,7 +21,7 @@ A short description of the required additional packages and how to create an exe
 # Help
 - Import Data: Make sure that all fields have an entry, all entries can be filled in manually.
 - Press the 'Berechnen!' button to calculate the retention
-- The results can be saved via 'Save Data' (choose a name and directory)
+- The results can be saved via 'File -> Speichern als...' (choose a name and directory) -> creates a pdf-printout
 
 
 # Examples
@@ -29,7 +29,8 @@ Check the [Examples](/Examples) folder for several measured data sets of differe
 
 
 # Notes
-This software is distributed under an open source license, see LICENSE.txt for details.
+This software is distributed under an open-source license, see LICENSE.txt for details.
 
 
 # Links
+GitHub: https://github.com/Ede1994/SeHCAT_eval

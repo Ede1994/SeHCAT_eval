@@ -148,7 +148,7 @@ def impressum():
     T.config(yscrollcommand=S.set)
     quote= '''Author: Eric Einspänner (Clinic for Radiology and Nuclear Medicine, UMMD Magdeburg (Germany))
 Contact: eric.einspaenner@med.ovgu.de
-GitHub:
+GitHub: https://github.com/Ede1994/SeHCAT_eval
 
 This program is free software.'''
     T.insert(tk.END, quote)
