@@ -27,6 +27,7 @@ LARGE_FONT= ("Verdana", 12)
 NORM_FONT = ("Helvetica", 10)
 SMALL_FONT = ("Helvetica", 8)
 
+
 #%% constants and memory
 
 decay_factor = 1.04
@@ -93,6 +94,7 @@ def retention_lists(counts_0d):
         dt_list.append(dt)
         dt += 0.5
     return dt_list, retention_10, retention_15
+
 
 #%% Functions for GUI
 
@@ -214,6 +216,7 @@ def SaveData():
     # remove tmp files
     os.remove(filename)
 
+
 #%% Spectrum Conv classes
 
 ### constructor app
@@ -275,6 +278,7 @@ class SeHCAT_eval(tk.Tk):
 
 
 #%% start page/ home screen
+
 class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -287,8 +291,8 @@ class StartPage(tk.Frame):
         There is no promise of warranty."""), font=LARGE_FONT)
         label.pack(pady=10,padx=10)
         
-        # patient data
-        # entries
+        ### patient data
+        ### entries
         group_patient = ttk.LabelFrame(self, text="Patientendaten")
         group_patient.pack()
 
@@ -338,6 +342,7 @@ class StartPage(tk.Frame):
                             command = lambda: controller.show_frame(two_energy_window))
         button2.pack()
     
+    # store patient infos in dic
     def load(self):
         patdata['Name'] = self.entry_patname.get()
         patdata['Birthday'] = self.entry_patbirth.get()
@@ -351,6 +356,7 @@ class StartPage(tk.Frame):
 
 
 #%% one energy window
+
 class one_energy_window(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -362,7 +368,7 @@ class one_energy_window(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         buttonHome.pack()
         
-        # entries
+        ### entries
         group_1 = ttk.LabelFrame(self, text="1-Energiefenster")
         group_1.pack()
 
@@ -419,10 +425,12 @@ class one_energy_window(tk.Frame):
         self.label_retention_1 = tk.Label(group_1r, text="Tag 7 Retention [%]:").grid(row=0)
         self.label_areaRetention_1 = tk.Label(group_1r, bg='gray', width='12', text="")
         self.label_areaRetention_1.grid(row=0, column=1, padx=10)
-    
+
+        # Button: calculation
         buttonCalc = ttk.Button(self, text="Berechnen", command = self.buttonCalculate_one_window)
         buttonCalc.pack()
 
+        ### plot area
         canvas = FigureCanvasTkAgg(fig, self)
         canvas.draw()
         canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand = True)
@@ -433,7 +441,7 @@ class one_energy_window(tk.Frame):
     
     ### calculation for one energy window
     def buttonCalculate_one_window(self):
-        # get values
+        ### get values
         # background ant 0d
         background_0d_ant = self.entry_background_0d_ant.get()
         if background_0d_ant == '':
@@ -490,6 +498,7 @@ class one_energy_window(tk.Frame):
         else:
             post_counts_7d = float(post_counts_7d) * 10**3
 
+        ### retention
         retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d_ant)*(post_counts_7d - background_7d_post)) \
                                           / np.sqrt((ant_counts_0d - background_0d_ant)*(post_counts_0d - background_0d_post))) * 100., 2)
     
@@ -499,11 +508,11 @@ class one_energy_window(tk.Frame):
         dt_list, retention_10, retention_15 = retention_lists(counts_0d)
         dt_selen, decay_selen = selen_decay(counts_0d)
 
-        # results; add in label areas
+        ### results; add in label areas
         self.label_areaRetention_1.config(text=str(retention_1w))
         patdata['Retention 1-Fenster [%]'] = retention_1w
         
-        # plot
+        ### plot
         ax1.clear()
         ax2.clear()
     
@@ -529,6 +538,7 @@ class one_energy_window(tk.Frame):
 
 
 #%% two energy windows
+
 class two_energy_window(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -540,7 +550,7 @@ class two_energy_window(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         buttonHome.pack()
         
-        # entries
+        ### entries
         group_2 = tk.LabelFrame(self, text="2-Energiefenster")
         group_2.pack()
 
@@ -657,7 +667,7 @@ class two_energy_window(tk.Frame):
     
     ### calculation for two energy windows
     def buttonCalculate_two_windows(self):
-        # get values
+        ### get values
         #background ant 0d w2
         background_0d_ant_w1 = self.entry_background_0d_ant_w1.get()
         if background_0d_ant_w1 == '':
@@ -772,21 +782,21 @@ class two_energy_window(tk.Frame):
         else:
             post_counts_7d_window2 = float(post_counts_7d_window2) * 10**3
 
-        # retention = (window1 + window2)/2 (round -> .00)
+        ### retention = (window1 + window2)/2 (round -> .00)
         retention_2w = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2))) \
                       / np.sqrt((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2)*(post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) * 100., 2)
 
         counts_0d = ((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2) + (post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) / 2.
         counts_7d = ((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2) + (post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2)) / 2.
         
-        # results; add in label areas
+        ### results; add in label areas
         self.label_areaRetention_2.config(text=str(retention_2w))
         patdata['Retention 2-Fenster [%]'] = retention_2w
     
         dt_list, retention_10, retention_15 = retention_lists(counts_0d)
         dt_selen, decay_selen = selen_decay(counts_0d)
 
-        # plot
+        ### plot
         ax3.clear()
         ax4.clear()
     
