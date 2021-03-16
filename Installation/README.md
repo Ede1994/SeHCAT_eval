@@ -2,10 +2,14 @@
 You have to have Python 3 with the following packages installed:
 
 - numpy
+- math
 - tkinter
 - os
 - reportlab
+- matplotlib
+- pydicom
 
+e.g.:
 ```
 $ pip install numpy tk os reportlab
 ```
