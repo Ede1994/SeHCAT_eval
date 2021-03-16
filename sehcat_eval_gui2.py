@@ -15,6 +15,7 @@ from tkinter import filedialog
 import os
 import numpy as np
 import math
+import pydicom
 
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
@@ -26,6 +27,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 LARGE_FONT= ("Verdana", 12)
 NORM_FONT = ("Helvetica", 10)
 SMALL_FONT = ("Helvetica", 8)
+
 
 #%% constants and memory
 
@@ -94,6 +96,7 @@ def retention_lists(counts_0d):
         dt += 0.5
     return dt_list, retention_10, retention_15
 
+
 #%% Functions for GUI
 
 # popupmsg as place holder
@@ -138,6 +141,22 @@ This program is free software."""), font=NORM_FONT)
     B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
     B1.pack()
     popup.mainloop()
+
+# 
+def dcm2data(filename):
+    # read dicom file
+    dcm_file = pydicom.read_file(filename)
+
+    # convert to array
+    np_pixel_array = dcm_file.pixel_array
+        
+    ant_w1 = float(np.sum(np_pixel_array[0]) / 1000)
+    post_w1 = float(np.sum(np_pixel_array[1]) / 1000)
+    ant_w2 = float(np.sum(np_pixel_array[2]) / 1000)
+    post_w2 = float(np.sum(np_pixel_array[3]) / 1000)
+    
+    return ant_w1, post_w1, ant_w2, post_w2
+
 
 # save button; pdf printout
 def SaveData():    
@@ -214,6 +233,7 @@ def SaveData():
     # remove tmp files
     os.remove(filename)
 
+
 #%% Spectrum Conv classes
 
 ### constructor app
@@ -275,6 +295,7 @@ class SeHCAT_eval(tk.Tk):
 
 
 #%% start page/ home screen
+
 class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -287,8 +308,8 @@ class StartPage(tk.Frame):
         There is no promise of warranty."""), font=LARGE_FONT)
         label.pack(pady=10,padx=10)
         
-        # patient data
-        # entries
+        ### patient data
+        ### entries
         group_patient = ttk.LabelFrame(self, text="Patientendaten")
         group_patient.pack()
 
@@ -338,6 +359,7 @@ class StartPage(tk.Frame):
                             command = lambda: controller.show_frame(two_energy_window))
         button2.pack()
     
+    # store patient infos in dic
     def load(self):
         patdata['Name'] = self.entry_patname.get()
         patdata['Birthday'] = self.entry_patbirth.get()
@@ -351,6 +373,7 @@ class StartPage(tk.Frame):
 
 
 #%% one energy window
+
 class one_energy_window(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -362,7 +385,7 @@ class one_energy_window(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         buttonHome.pack()
         
-        # entries
+        ### entries
         group_1 = ttk.LabelFrame(self, text="1-Energiefenster")
         group_1.pack()
 
@@ -419,10 +442,12 @@ class one_energy_window(tk.Frame):
         self.label_retention_1 = tk.Label(group_1r, text="Tag 7 Retention [%]:").grid(row=0)
         self.label_areaRetention_1 = tk.Label(group_1r, bg='gray', width='12', text="")
         self.label_areaRetention_1.grid(row=0, column=1, padx=10)
-    
+
+        # Button: calculation
         buttonCalc = ttk.Button(self, text="Berechnen", command = self.buttonCalculate_one_window)
         buttonCalc.pack()
 
+        ### plot area
         canvas = FigureCanvasTkAgg(fig, self)
         canvas.draw()
         canvas.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand = True)
@@ -433,63 +458,64 @@ class one_energy_window(tk.Frame):
     
     ### calculation for one energy window
     def buttonCalculate_one_window(self):
-        # get values
+        ### get values
         # background ant 0d
         background_0d_ant = self.entry_background_0d_ant.get()
         if background_0d_ant == '':
             popupmsg("Fehler: Kein Hintergrund 0d ant!")
         else:
-            background_0d_ant = float(background_0d_ant) * 10**3
+            background_0d_ant = float(background_0d_ant)# * 10**3
 
      	# background ant 7d
         background_7d_ant = self.entry_background_7d_ant.get()
         if background_7d_ant == '':
             popupmsg("Fehler: Kein Hintergrund 7d ant!")
         else:
-            background_7d_ant = float(background_7d_ant) * 10**3
+            background_7d_ant = float(background_7d_ant)# * 10**3
 
      	# background post 0d
         background_0d_post = self.entry_background_0d_post.get()
         if background_0d_post == '':
             popupmsg("Fehler: Kein Hintergrund 0d post!")
         else:
-            background_0d_post = float(background_0d_post) * 10**3
+            background_0d_post = float(background_0d_post)# * 10**3
 
      	# background post 7d
         background_7d_post = self.entry_background_7d_post.get()
         if background_7d_post == '':
      	    popupmsg("Fehler: Kein Hintergrund 7d post!")
         else:
-            background_7d_post = float(background_7d_post) * 10**3
+            background_7d_post = float(background_7d_post)# * 10**3
 
      	# Ant 0d
         ant_counts_0d = self.entry_ant_counts_0d.get()
         if ant_counts_0d == '':
      	   popupmsg("Fehler: Keine ant counts 0d!")
         else:
-            ant_counts_0d = float(ant_counts_0d) * 10**3
+            ant_counts_0d = float(ant_counts_0d)# * 10**3
 
      	# Post 0d
         post_counts_0d = self.entry_post_counts_0d.get()
         if post_counts_0d == '':
             popupmsg("Fehler: Keine post counts 0d!")
         else:
-            post_counts_0d = float(post_counts_0d) * 10**3
+            post_counts_0d = float(post_counts_0d)# * 10**3
 
      	# Ant 7d
         ant_counts_7d = self.entry_ant_counts_7d.get()
         if ant_counts_7d == '':
             popupmsg("Fehler: Keine ant counts 7d!")
         else:
-            ant_counts_7d = float(ant_counts_7d) * 10**3
+            ant_counts_7d = float(ant_counts_7d)# * 10**3
 
      	# Post 7d
         post_counts_7d = self.entry_post_counts_7d.get()
         if post_counts_7d == '':
             popupmsg("Fehler: Keine post counts 7d!")
         else:
-            post_counts_7d = float(post_counts_7d) * 10**3
+            post_counts_7d = float(post_counts_7d)# * 10**3
 
+        ### retention
         retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d_ant)*(post_counts_7d - background_7d_post)) \
                                           / np.sqrt((ant_counts_0d - background_0d_ant)*(post_counts_0d - background_0d_post))) * 100., 2)
     
@@ -499,11 +525,11 @@ class one_energy_window(tk.Frame):
         dt_list, retention_10, retention_15 = retention_lists(counts_0d)
         dt_selen, decay_selen = selen_decay(counts_0d)
 
-        # results; add in label areas
+        ### results; add in label areas
         self.label_areaRetention_1.config(text=str(retention_1w))
         patdata['Retention 1-Fenster [%]'] = retention_1w
         
-        # plot
+        ### plot
         ax1.clear()
         ax2.clear()
     
@@ -529,6 +555,7 @@ class one_energy_window(tk.Frame):
 
 
 #%% two energy windows
+
 class two_energy_window(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -540,7 +567,7 @@ class two_energy_window(tk.Frame):
                             command=lambda: controller.show_frame(StartPage))
         buttonHome.pack()
         
-        # entries
+        ### entries
         group_2 = tk.LabelFrame(self, text="2-Energiefenster")
         group_2.pack()
 
@@ -548,11 +575,11 @@ class two_energy_window(tk.Frame):
         group_2b = tk.LabelFrame(group_2, text="Hintergrund")
         group_2b.pack()
 
-        # bg energy window 1
-        group_2b_w1 = tk.LabelFrame(group_2b, text="1. Energiefenster")
+        # bg day 0
+        group_2b_w1 = tk.LabelFrame(group_2b, text="BG Tag 0")
         group_2b_w1.pack()
 
-        self.label_background_0d_ant_w1 = tk.Label(group_2b_w1, text="BG 0d ant [kcts]:").grid(row=0)
+        self.label_background_0d_ant_w1 = tk.Label(group_2b_w1, text="Fenster 1 - BG 0d ant [kcts]:").grid(row=0)
         self.label_background_0d_post_w1 = tk.Label(group_2b_w1, text="BG 0d post [kcts]:").grid(row=0, column=3, padx=26)
 
         self.entry_background_0d_ant_w1 = tk.Entry(group_2b_w1)
@@ -560,30 +587,34 @@ class two_energy_window(tk.Frame):
 
         self.entry_background_0d_post_w1 = tk.Entry(group_2b_w1)
         self.entry_background_0d_post_w1.grid(row=0, column=4, padx=15)
+        
+        self.label_background_0d_ant_w2 = tk.Label(group_2b_w1, text="Fenster 2 - BG 0d ant [kcts]:").grid(row=1)
+        self.label_background_0d_post_w2 = tk.Label(group_2b_w1, text="BG 0d post [kcts]:").grid(row=1, column=3, padx=26)
 
-        self.label_background_7d_ant_w1 = tk.Label(group_2b_w1, text="BG 7d ant [kcts]:").grid(row=1)
-        self.label_background_7d_post_w1 = tk.Label(group_2b_w1, text="BG 7d post [kcts]:").grid(row=1, column=3, padx=26)
+        self.entry_background_0d_ant_w2 = tk.Entry(group_2b_w1)
+        self.entry_background_0d_ant_w2.grid(row=1, column=1, padx=15)
 
-        self.entry_background_7d_ant_w1 = tk.Entry(group_2b_w1)
-        self.entry_background_7d_ant_w1.grid(row=1, column=1, padx=15)
+        self.entry_background_0d_post_w2 = tk.Entry(group_2b_w1)
+        self.entry_background_0d_post_w2.grid(row=1, column=4, padx=15)
 
-        self.entry_background_7d_post_w1 = tk.Entry(group_2b_w1)
-        self.entry_background_7d_post_w1.grid(row=1, column=4, padx=15)
+        button_loadBG_0day = ttk.Button(group_2b_w1, text="Load BG Tag 0",
+                            command = self.buttonImport_BG_0d)
+        button_loadBG_0day.grid(row=1, column=5, padx=15)
 
-        # bg energy window 2
-        group_2b_w2 = tk.LabelFrame(group_2b, text="2. Energiefenster")
+        # bg day 7
+        group_2b_w2 = tk.LabelFrame(group_2b, text="BG Tag 7")
         group_2b_w2.pack()
 
-        self.label_background_0d_ant_w2 = tk.Label(group_2b_w2, text="BG 0d ant [kcts]:").grid(row=0)
-        self.label_background_0d_post_w2 = tk.Label(group_2b_w2, text="BG 0d post [kcts]:").grid(row=0, column=3, padx=26)
+        self.label_background_7d_ant_w1 = tk.Label(group_2b_w2, text="Fenster 1 - BG 7d ant [kcts]:").grid(row=0)
+        self.label_background_7d_post_w1 = tk.Label(group_2b_w2, text="BG 7d post [kcts]:").grid(row=0, column=3, padx=26)
 
-        self.entry_background_0d_ant_w2 = tk.Entry(group_2b_w2)
-        self.entry_background_0d_ant_w2.grid(row=0, column=1, padx=15)
+        self.entry_background_7d_ant_w1 = tk.Entry(group_2b_w2)
+        self.entry_background_7d_ant_w1.grid(row=0, column=1, padx=15)
 
-        self.entry_background_0d_post_w2 = tk.Entry(group_2b_w2)
-        self.entry_background_0d_post_w2.grid(row=0, column=4, padx=15)
+        self.entry_background_7d_post_w1 = tk.Entry(group_2b_w2)
+        self.entry_background_7d_post_w1.grid(row=0, column=4, padx=15)
 
-        self.label_background_7d_ant_w2 = tk.Label(group_2b_w2, text="BG 7d ant [kcts]:").grid(row=1)
+        self.label_background_7d_ant_w2 = tk.Label(group_2b_w2, text="Fenster 2 - BG 7d ant [kcts]:").grid(row=1)
         self.label_background_7d_post_w2 = tk.Label(group_2b_w2, text="BG 7d post [kcts]:").grid(row=1, column=3, padx=26)
 
         self.entry_background_7d_ant_w2 = tk.Entry(group_2b_w2)
@@ -592,49 +623,61 @@ class two_energy_window(tk.Frame):
         self.entry_background_7d_post_w2 = tk.Entry(group_2b_w2)
         self.entry_background_7d_post_w2.grid(row=1, column=4, padx=15)
 
-        # energy window 1
-        group_21 = tk.LabelFrame(group_2, text="1. Energiefenster")
+        button_loadBG_7day = ttk.Button(group_2b_w2, text="Load BG Tag 7",
+                            command = self.buttonImport_BG_7d)
+        button_loadBG_7day.grid(row=1, column=5, padx=15)
+
+        # WB day 0
+        group_21 = tk.LabelFrame(group_2, text="WB Tag 0")
         group_21.pack()
 
-        self.label_ant_counts_0d_window1 = tk.Label(group_21, text="Ant 0d [kcts]:").grid(row=0)
+        self.label_ant_counts_0d_window1 = tk.Label(group_21, text="Fenster 1 - Ant 0d [kcts]:").grid(row=0)
         self.label_post_counts_0d_window1 = tk.Label(group_21, text="Post 0d [kcts]:").grid(row=0, column=3, padx=26)
-
-        self.label_ant_counts_7d_window1 = tk.Label(group_21, text="Ant 7d [kcts]:").grid(row=1)
-        self.label_post_counts_7d_window1 = tk.Label(group_21, text="Post 7d [kcts]:").grid(row=1, column=3, padx=26)
 
         self.entry_ant_counts_0d_window1 = tk.Entry(group_21)
         self.entry_ant_counts_0d_window1.grid(row=0, column=1, padx=10)
 
         self.entry_post_counts_0d_window1 = tk.Entry(group_21)
         self.entry_post_counts_0d_window1.grid(row=0, column=4, padx=15)
+        
+        self.label_ant_counts_0d_window2 = tk.Label(group_21, text="Fenster 2 - Ant 0d [kcts]:").grid(row=1)
+        self.label_post_counts_0d_window2 = tk.Label(group_21, text="Post 0d [kcts]:").grid(row=1, column=3, padx=26)
 
-        self.entry_ant_counts_7d_window1 = tk.Entry(group_21)
-        self.entry_ant_counts_7d_window1.grid(row=1, column=1, padx=10)
+        self.entry_ant_counts_0d_window2 = tk.Entry(group_21)
+        self.entry_ant_counts_0d_window2.grid(row=1, column=1, padx=10)
 
-        self.entry_post_counts_7d_window1 = tk.Entry(group_21)
-        self.entry_post_counts_7d_window1.grid(row=1, column=4, padx=15)
+        self.entry_post_counts_0d_window2 = tk.Entry(group_21)
+        self.entry_post_counts_0d_window2.grid(row=1, column=4, padx=15)
+        
+        button_loadWB_0day = ttk.Button(group_21, text="Load WB Tag 0",
+                            command = self.buttonImport_WB_0d)
+        button_loadWB_0day.grid(row=1, column=5, padx=15)
 
-        # energy window 2
-        group_22 = tk.LabelFrame(group_2, text="2. Energiefenster")
+        # WB day 7
+        group_22 = tk.LabelFrame(group_2, text="WB Tag 7")
         group_22.pack()
 
-        self.label_ant_counts_0d_window2 = tk.Label(group_22, text="Ant 0d [kcts]:").grid(row=0)
-        self.label_post_counts_0d_window2 = tk.Label(group_22, text="Post 0d [kcts]:").grid(row=0, column=3, padx=26)
+        self.label_ant_counts_7d_window1 = tk.Label(group_22, text="Fenster 1 - Ant 7d [kcts]:").grid(row=0)
+        self.label_post_counts_7d_window1 = tk.Label(group_22, text="Post 7d [kcts]:").grid(row=0, column=3, padx=26)
 
-        self.label_ant_counts_7d_window2 = tk.Label(group_22, text="Ant 7d [kcts]:").grid(row=1)
+        self.entry_ant_counts_7d_window1 = tk.Entry(group_22)
+        self.entry_ant_counts_7d_window1.grid(row=0, column=1, padx=10)
+
+        self.entry_post_counts_7d_window1 = tk.Entry(group_22)
+        self.entry_post_counts_7d_window1.grid(row=0, column=4, padx=15)
+
+        self.label_ant_counts_7d_window2 = tk.Label(group_22, text="Fenster 2 - Ant 7d [kcts]:").grid(row=1)
         self.label_post_counts_7d_window2 = tk.Label(group_22, text="Post 7d [kcts]:").grid(row=1, column=3, padx=26)
-
-        self.entry_ant_counts_0d_window2 = tk.Entry(group_22)
-        self.entry_ant_counts_0d_window2.grid(row=0, column=1, padx=10)
-
-        self.entry_post_counts_0d_window2 = tk.Entry(group_22)
-        self.entry_post_counts_0d_window2.grid(row=0, column=4, padx=15)
 
         self.entry_ant_counts_7d_window2 = tk.Entry(group_22)
         self.entry_ant_counts_7d_window2.grid(row=1, column=1, padx=10)
 
         self.entry_post_counts_7d_window2 = tk.Entry(group_22)
         self.entry_post_counts_7d_window2.grid(row=1, column=4, padx=15)
+        
+        button_loadWB_7day = ttk.Button(group_22, text="Load WB Tag 7",
+                            command = self.buttonImport_WB_7d)
+        button_loadWB_7day.grid(row=1, column=5, padx=15)
 
         # retention
         group_2r = tk.LabelFrame(group_2, text="Retention")
@@ -654,65 +697,121 @@ class two_energy_window(tk.Frame):
         toolbar2 = NavigationToolbar2Tk(canvas2, self)
         toolbar2.update()
         canvas2._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-    
+
+    def buttonImport_BG_0d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant_w1, post_w1, ant_w2, post_w2 = dcm2data(filename)
+        
+        self.entry_background_0d_ant_w1.insert(10, ant_w1)
+        self.entry_background_0d_post_w1.insert(10, post_w1)
+        self.entry_background_0d_ant_w2.insert(10, ant_w2)
+        self.entry_background_0d_post_w2.insert(10, post_w2)
+
+    def buttonImport_BG_7d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant_w1, post_w1, ant_w2, post_w2 = dcm2data(filename)
+        
+        self.entry_background_7d_ant_w1.insert(10, ant_w1)
+        self.entry_background_7d_post_w1.insert(10, post_w1)
+        self.entry_background_7d_ant_w2.insert(10, ant_w2)
+        self.entry_background_7d_post_w2.insert(10, post_w2)
+
+    def buttonImport_WB_0d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant_w1, post_w1, ant_w2, post_w2 = dcm2data(filename)
+        
+        self.entry_ant_counts_0d_window1.insert(10, ant_w1)
+        self.entry_post_counts_0d_window1.insert(10, post_w1)
+        self.entry_ant_counts_0d_window2.insert(10, ant_w2)
+        self.entry_post_counts_0d_window2.insert(10, post_w2)
+
+    def buttonImport_WB_7d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant_w1, post_w1, ant_w2, post_w2 = dcm2data(filename)
+        
+        self.entry_ant_counts_7d_window1.insert(10, ant_w1)
+        self.entry_post_counts_7d_window1.insert(10, post_w1)
+        self.entry_ant_counts_7d_window2.insert(10, ant_w2)
+        self.entry_post_counts_7d_window2.insert(10, post_w2)
+
     ### calculation for two energy windows
     def buttonCalculate_two_windows(self):
-        # get values
+        ### get values
         #background ant 0d w2
         background_0d_ant_w1 = self.entry_background_0d_ant_w1.get()
         if background_0d_ant_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 0d ant 1-Fenster!")
         else:
-            background_0d_ant_w1 = float(background_0d_ant_w1) * 10**3
+            background_0d_ant_w1 = float(background_0d_ant_w1)# * 10**3
 
      	# background 0d post w2
         background_0d_post_w1 = self.entry_background_0d_post_w1.get()
         if background_0d_post_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 0d post 1-Fenster!")
         else:
-            background_0d_post_w1 = float(background_0d_post_w1) * 10**3
+            background_0d_post_w1 = float(background_0d_post_w1)# * 10**3
 
         # background ant 7d w2
         background_7d_ant_w1 = self.entry_background_7d_ant_w1.get()
         if background_7d_ant_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 7d ant 1-Fenster!")
         else:
-            background_7d_ant_w1 = float(background_7d_ant_w1) * 10**3
+            background_7d_ant_w1 = float(background_7d_ant_w1)# * 10**3
 
      	# background post 7d w2
         background_7d_post_w1 = self.entry_background_7d_post_w1.get()
         if background_7d_post_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 7d post 1-Fenster!")
         else:
-            background_7d_post_w1 = float(background_7d_post_w1) * 10**3
+            background_7d_post_w1 = float(background_7d_post_w1)# * 10**3
 
         # backgound ant 0d w2
         background_0d_ant_w2 = self.entry_background_0d_ant_w2.get()
         if background_0d_ant_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 0d ant 2-Fenster!")
         else:
-            background_0d_ant_w2 = float(background_0d_ant_w2) * 10**3
+            background_0d_ant_w2 = float(background_0d_ant_w2)# * 10**3
 
      	# background 0d post w2
         background_0d_post_w2 = self.entry_background_0d_post_w2.get()
         if background_0d_post_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 0d post 2-Fenster!")
         else:
-            background_0d_post_w2 = float(background_0d_post_w2) * 10**3
+            background_0d_post_w2 = float(background_0d_post_w2)# * 10**3
 
         # background ant 7d w2
         background_7d_ant_w2 = self.entry_background_7d_ant_w2.get()
         if background_7d_ant_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 7d ant 2-Fenster!")
         else:
-            background_7d_ant_w2 = float(background_7d_ant_w2) * 10**3
+            background_7d_ant_w2 = float(background_7d_ant_w2)# * 10**3
 
      	# background post 7d w2
         background_7d_post_w2 = self.entry_background_7d_post_w2.get()
         if background_7d_post_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 7d post 2-Fenster!")
         else:
-            background_7d_post_w2 = float(background_7d_post_w2) * 10**3
+            background_7d_post_w2 = float(background_7d_post_w2)# * 10**3
 
         # window 1
         # ant 0d
@@ -720,28 +819,28 @@ class two_energy_window(tk.Frame):
         if ant_counts_0d_window1 == '':
             popupmsg("Fehler: Keine ant counts 0d für 1-Energiefenster!")
         else:
-            ant_counts_0d_window1 = float(ant_counts_0d_window1) * 10**3
+            ant_counts_0d_window1 = float(ant_counts_0d_window1)# * 10**3
 
      	# Post 0d
         post_counts_0d_window1 = self.entry_post_counts_0d_window1.get()
         if post_counts_0d_window1 == '':
             popupmsg("Fehler: Keine post counts 0d für 1-Energiefenster!")
         else:
-            post_counts_0d_window1 = float(post_counts_0d_window1) * 10**3
+            post_counts_0d_window1 = float(post_counts_0d_window1)# * 10**3
 
      	# Ant 7d
         ant_counts_7d_window1 = self.entry_ant_counts_7d_window1.get()
         if ant_counts_7d_window1 == '':
             popupmsg("Fehler: Keine ant counts 7d für 1-Energiefenster!")
         else:
-            ant_counts_7d_window1 = float(ant_counts_7d_window1) * 10**3
+            ant_counts_7d_window1 = float(ant_counts_7d_window1)# * 10**3
 
      	# Post 7d
         post_counts_7d_window1 = self.entry_post_counts_7d_window1.get()
         if post_counts_7d_window1 == '':
             popupmsg("Fehler: Keine post counts 7d für 1-Energiefenster!")
         else:
-            post_counts_7d_window1 = float(post_counts_7d_window1) * 10**3
+            post_counts_7d_window1 = float(post_counts_7d_window1)# * 10**3
 
         # window 2
         # Ant 0d
@@ -749,44 +848,44 @@ class two_energy_window(tk.Frame):
         if ant_counts_0d_window2 == '':
             popupmsg("Fehler: Keine ant counts 0d für 2-Energiefenster!")
         else:
-            ant_counts_0d_window2 = float(ant_counts_0d_window2) * 10**3
+            ant_counts_0d_window2 = float(ant_counts_0d_window2)# * 10**3
 
      	# Post 0d
         post_counts_0d_window2 = self.entry_post_counts_0d_window2.get()
         if post_counts_0d_window2 == '':
             popupmsg("Fehler: Keine post counts 0d für 2-Energiefenster!")
         else:
-            post_counts_0d_window2 = float(post_counts_0d_window2) * 10**3
+            post_counts_0d_window2 = float(post_counts_0d_window2)# * 10**3
 
      	# Ant 7d
         ant_counts_7d_window2 = self.entry_ant_counts_7d_window2.get()
         if ant_counts_7d_window2 == '':
              popupmsg("Fehler: Keine ant counts d für 2-Energiefenster!")
         else:
-            ant_counts_7d_window2 = float(ant_counts_7d_window2) * 10**3
+            ant_counts_7d_window2 = float(ant_counts_7d_window2)# * 10**3
 
      	# Post 7d
         post_counts_7d_window2 = self.entry_post_counts_7d_window2.get()
         if post_counts_7d_window2 == '':
             popupmsg("Fehler: Keine post counts 7d für 2-Energiefenster!")
         else:
-            post_counts_7d_window2 = float(post_counts_7d_window2) * 10**3
+            post_counts_7d_window2 = float(post_counts_7d_window2)# * 10**3
 
-        # retention = (window1 + window2)/2 (round -> .00)
+        ### retention = (window1 + window2)/2 (round -> .00)
         retention_2w = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2))) \
                       / np.sqrt((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2)*(post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) * 100., 2)
 
         counts_0d = ((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2) + (post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) / 2.
         counts_7d = ((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2) + (post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2)) / 2.
         
-        # results; add in label areas
+        ### results; add in label areas
         self.label_areaRetention_2.config(text=str(retention_2w))
         patdata['Retention 2-Fenster [%]'] = retention_2w
     
         dt_list, retention_10, retention_15 = retention_lists(counts_0d)
         dt_selen, decay_selen = selen_decay(counts_0d)
 
-        # plot
+        ### plot
         ax3.clear()
         ax4.clear()
     
