@@ -402,6 +402,10 @@ class one_energy_window(tk.Frame):
         self.entry_background_0d_post = tk.Entry(group_1b)
         self.entry_background_0d_post.grid(row=0, column=4, padx=15)
 
+        button_loadBG_0day = ttk.Button(group_1b, text="Load BG Tag 0",
+                            command = self.buttonImport_BG_0d)
+        button_loadBG_0day.grid(row=0, column=5, padx=15)
+
         self.label_background_7d_ant = tk.Label(group_1b, text="BG 7d ant [kcts]:").grid(row=1)
         self.label_background_7d_post = tk.Label(group_1b, text="BG 7d post [kcts]:").grid(row=1, column=3, padx=26)
 
@@ -410,6 +414,10 @@ class one_energy_window(tk.Frame):
 
         self.entry_background_7d_post = tk.Entry(group_1b)
         self.entry_background_7d_post.grid(row=1, column=4, padx=15)
+
+        button_loadBG_7day = ttk.Button(group_1b, text="Load BG Tag 7",
+                            command = self.buttonImport_BG_7d)
+        button_loadBG_7day.grid(row=1, column=5, padx=15)
 
         # 0 and 7 days group
         group_11 = ttk.LabelFrame(group_1, text="Counts")
@@ -425,6 +433,10 @@ class one_energy_window(tk.Frame):
         self.entry_post_counts_0d = tk.Entry(group_11)
         self.entry_post_counts_0d.grid(row=0, column=4, padx=15)
 
+        button_loadWB_0day = ttk.Button(group_11, text="Load WB Tag 0",
+                            command = self.buttonImport_WB_0d)
+        button_loadWB_0day.grid(row=0, column=5, padx=15)
+
         # 7 days
         self.label_ant_counts_7d = tk.Label(group_11, text="Ant 7d [kcts]:").grid(row=1)
         self.label_post_counts_7d = tk.Label(group_11, text="Post 7d [kcts]:").grid(row=1, column=3, padx=26)
@@ -434,6 +446,10 @@ class one_energy_window(tk.Frame):
 
         self.entry_post_counts_7d = tk.Entry(group_11)
         self.entry_post_counts_7d.grid(row=1, column=4, padx=15)
+
+        button_loadWB_7day = ttk.Button(group_11, text="Load WB Tag 7",
+                            command = self.buttonImport_WB_7d)
+        button_loadWB_7day.grid(row=1, column=5, padx=15)
 
         # retention group
         group_1r = ttk.LabelFrame(group_1, text="Retention")
@@ -455,6 +471,55 @@ class one_energy_window(tk.Frame):
         toolbar = NavigationToolbar2Tk(canvas, self)
         toolbar.update()
         canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand = True)
+
+    ### Load Buttons
+    def buttonImport_BG_0d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant, post = dcm2data(filename)
+        
+        self.entry_background_0d_ant.insert(10, ant)
+        self.entry_background_0d_post.insert(10, post)
+
+    def buttonImport_BG_7d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant, post = dcm2data(filename)
+        
+        self.entry_background_7d_ant.insert(10, ant)
+        self.entry_background_7d_post.insert(10, post)
+
+    def buttonImport_WB_0d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant, post = dcm2data(filename)
+        
+        self.entry_ant_counts_0d.insert(10, ant)
+        self.entry_post_counts_0d.insert(10, post)
+
+    def buttonImport_WB_7d(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        ant, post = dcm2data(filename)
+        
+        self.entry_ant_counts_7d.insert(10, ant)
+        self.entry_post_counts_7d.insert(10, post)
     
     ### calculation for one energy window
     def buttonCalculate_one_window(self):
@@ -464,56 +529,56 @@ class one_energy_window(tk.Frame):
         if background_0d_ant == '':
             popupmsg("Fehler: Kein Hintergrund 0d ant!")
         else:
-            background_0d_ant = float(background_0d_ant)# * 10**3
+            background_0d_ant = float(background_0d_ant)
 
      	# background ant 7d
         background_7d_ant = self.entry_background_7d_ant.get()
         if background_7d_ant == '':
             popupmsg("Fehler: Kein Hintergrund 7d ant!")
         else:
-            background_7d_ant = float(background_7d_ant)# * 10**3
+            background_7d_ant = float(background_7d_ant)
 
      	# background post 0d
         background_0d_post = self.entry_background_0d_post.get()
         if background_0d_post == '':
             popupmsg("Fehler: Kein Hintergrund 0d post!")
         else:
-            background_0d_post = float(background_0d_post)# * 10**3
+            background_0d_post = float(background_0d_post)
 
      	# background post 7d
         background_7d_post = self.entry_background_7d_post.get()
         if background_7d_post == '':
      	    popupmsg("Fehler: Kein Hintergrund 7d post!")
         else:
-            background_7d_post = float(background_7d_post)# * 10**3
+            background_7d_post = float(background_7d_post)
 
      	# Ant 0d
         ant_counts_0d = self.entry_ant_counts_0d.get()
         if ant_counts_0d == '':
      	   popupmsg("Fehler: Keine ant counts 0d!")
         else:
-            ant_counts_0d = float(ant_counts_0d)# * 10**3
+            ant_counts_0d = float(ant_counts_0d)
 
      	# Post 0d
         post_counts_0d = self.entry_post_counts_0d.get()
         if post_counts_0d == '':
             popupmsg("Fehler: Keine post counts 0d!")
         else:
-            post_counts_0d = float(post_counts_0d)# * 10**3
+            post_counts_0d = float(post_counts_0d)
 
      	# Ant 7d
         ant_counts_7d = self.entry_ant_counts_7d.get()
         if ant_counts_7d == '':
             popupmsg("Fehler: Keine ant counts 7d!")
         else:
-            ant_counts_7d = float(ant_counts_7d)# * 10**3
+            ant_counts_7d = float(ant_counts_7d)
 
      	# Post 7d
         post_counts_7d = self.entry_post_counts_7d.get()
         if post_counts_7d == '':
             popupmsg("Fehler: Keine post counts 7d!")
         else:
-            post_counts_7d = float(post_counts_7d)# * 10**3
+            post_counts_7d = float(post_counts_7d)
 
         ### retention
         retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d_ant)*(post_counts_7d - background_7d_post)) \
@@ -762,56 +827,56 @@ class two_energy_window(tk.Frame):
         if background_0d_ant_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 0d ant 1-Fenster!")
         else:
-            background_0d_ant_w1 = float(background_0d_ant_w1)# * 10**3
+            background_0d_ant_w1 = float(background_0d_ant_w1)
 
      	# background 0d post w2
         background_0d_post_w1 = self.entry_background_0d_post_w1.get()
         if background_0d_post_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 0d post 1-Fenster!")
         else:
-            background_0d_post_w1 = float(background_0d_post_w1)# * 10**3
+            background_0d_post_w1 = float(background_0d_post_w1)
 
         # background ant 7d w2
         background_7d_ant_w1 = self.entry_background_7d_ant_w1.get()
         if background_7d_ant_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 7d ant 1-Fenster!")
         else:
-            background_7d_ant_w1 = float(background_7d_ant_w1)# * 10**3
+            background_7d_ant_w1 = float(background_7d_ant_w1)
 
      	# background post 7d w2
         background_7d_post_w1 = self.entry_background_7d_post_w1.get()
         if background_7d_post_w1 == '':
             popupmsg("Fehler: Kein Hintergrund 7d post 1-Fenster!")
         else:
-            background_7d_post_w1 = float(background_7d_post_w1)# * 10**3
+            background_7d_post_w1 = float(background_7d_post_w1)
 
         # backgound ant 0d w2
         background_0d_ant_w2 = self.entry_background_0d_ant_w2.get()
         if background_0d_ant_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 0d ant 2-Fenster!")
         else:
-            background_0d_ant_w2 = float(background_0d_ant_w2)# * 10**3
+            background_0d_ant_w2 = float(background_0d_ant_w2)
 
      	# background 0d post w2
         background_0d_post_w2 = self.entry_background_0d_post_w2.get()
         if background_0d_post_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 0d post 2-Fenster!")
         else:
-            background_0d_post_w2 = float(background_0d_post_w2)# * 10**3
+            background_0d_post_w2 = float(background_0d_post_w2)
 
         # background ant 7d w2
         background_7d_ant_w2 = self.entry_background_7d_ant_w2.get()
         if background_7d_ant_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 7d ant 2-Fenster!")
         else:
-            background_7d_ant_w2 = float(background_7d_ant_w2)# * 10**3
+            background_7d_ant_w2 = float(background_7d_ant_w2)
 
      	# background post 7d w2
         background_7d_post_w2 = self.entry_background_7d_post_w2.get()
         if background_7d_post_w2 == '':
             popupmsg("Fehler: Kein Hintergrund 7d post 2-Fenster!")
         else:
-            background_7d_post_w2 = float(background_7d_post_w2)# * 10**3
+            background_7d_post_w2 = float(background_7d_post_w2)
 
         # window 1
         # ant 0d
@@ -819,28 +884,28 @@ class two_energy_window(tk.Frame):
         if ant_counts_0d_window1 == '':
             popupmsg("Fehler: Keine ant counts 0d für 1-Energiefenster!")
         else:
-            ant_counts_0d_window1 = float(ant_counts_0d_window1)# * 10**3
+            ant_counts_0d_window1 = float(ant_counts_0d_window1)
 
      	# Post 0d
         post_counts_0d_window1 = self.entry_post_counts_0d_window1.get()
         if post_counts_0d_window1 == '':
             popupmsg("Fehler: Keine post counts 0d für 1-Energiefenster!")
         else:
-            post_counts_0d_window1 = float(post_counts_0d_window1)# * 10**3
+            post_counts_0d_window1 = float(post_counts_0d_window1)
 
      	# Ant 7d
         ant_counts_7d_window1 = self.entry_ant_counts_7d_window1.get()
         if ant_counts_7d_window1 == '':
             popupmsg("Fehler: Keine ant counts 7d für 1-Energiefenster!")
         else:
-            ant_counts_7d_window1 = float(ant_counts_7d_window1)# * 10**3
+            ant_counts_7d_window1 = float(ant_counts_7d_window1)
 
      	# Post 7d
         post_counts_7d_window1 = self.entry_post_counts_7d_window1.get()
         if post_counts_7d_window1 == '':
             popupmsg("Fehler: Keine post counts 7d für 1-Energiefenster!")
         else:
-            post_counts_7d_window1 = float(post_counts_7d_window1)# * 10**3
+            post_counts_7d_window1 = float(post_counts_7d_window1)
 
         # window 2
         # Ant 0d
@@ -848,28 +913,28 @@ class two_energy_window(tk.Frame):
         if ant_counts_0d_window2 == '':
             popupmsg("Fehler: Keine ant counts 0d für 2-Energiefenster!")
         else:
-            ant_counts_0d_window2 = float(ant_counts_0d_window2)# * 10**3
+            ant_counts_0d_window2 = float(ant_counts_0d_window2)
 
      	# Post 0d
         post_counts_0d_window2 = self.entry_post_counts_0d_window2.get()
         if post_counts_0d_window2 == '':
             popupmsg("Fehler: Keine post counts 0d für 2-Energiefenster!")
         else:
-            post_counts_0d_window2 = float(post_counts_0d_window2)# * 10**3
+            post_counts_0d_window2 = float(post_counts_0d_window2)
 
      	# Ant 7d
         ant_counts_7d_window2 = self.entry_ant_counts_7d_window2.get()
         if ant_counts_7d_window2 == '':
              popupmsg("Fehler: Keine ant counts d für 2-Energiefenster!")
         else:
-            ant_counts_7d_window2 = float(ant_counts_7d_window2)# * 10**3
+            ant_counts_7d_window2 = float(ant_counts_7d_window2)
 
      	# Post 7d
         post_counts_7d_window2 = self.entry_post_counts_7d_window2.get()
         if post_counts_7d_window2 == '':
             popupmsg("Fehler: Keine post counts 7d für 2-Energiefenster!")
         else:
-            post_counts_7d_window2 = float(post_counts_7d_window2)# * 10**3
+            post_counts_7d_window2 = float(post_counts_7d_window2)
 
         ### retention = (window1 + window2)/2 (round -> .00)
         retention_2w = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2))) \
