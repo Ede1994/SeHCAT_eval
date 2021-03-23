@@ -115,14 +115,12 @@ def Help():
     popup.wm_title("Help")
     label = ttk.Label(popup, text=("""Alle Felder entsprechend ausfüllen. Achtung: Angaben in kilo-Counts [kcts]!
 Durch das Betätigen des 'Berechnen!'-Buttons wird die Retention nach 7 Tagen in % ausgegeben!
-1-Energiefenster: Diese Eingabemaske benutzen, wenn nur EIN Energiefenster für die WB genutzt wurde.
-2-Energiefenster: Diese Eingabemaske benutzen, wenn nur ZWEI Energiefenster für die WB genutzt wurde.
+
 
 English:
 Please fill in all fields accordingly. Note: Data in kilo-counts!
 Press the 'Berechnen!'-Button to get the final retention in %.
-One energy window: Use this mask, if only one energy window was set for the WB.
-Two energy windows: Use this mask, if two energy windows were set for the WB."""), font=NORM_FONT)
+"""), font=NORM_FONT)
     label.pack(side="top", fill="x", pady=10)
     B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
     B1.pack()
