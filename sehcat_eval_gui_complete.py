@@ -17,8 +17,10 @@ import numpy as np
 import math
 import pydicom
 
+from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -51,8 +53,8 @@ patdata = {'Name': "-",
 fig = Figure(figsize=(6, 2), dpi=100)
 ax = fig.add_subplot(1,1,1)
 
-fig2 = Figure(figsize=(6, 2), dpi=100)
-ax2 = fig2.add_subplot(1,1,1)
+# fig2 = Figure(figsize=(6, 2), dpi=100)
+# ax2 = fig2.add_subplot(1,1,1)
 
 
 #%% Functions
@@ -222,8 +224,12 @@ def SaveData():
     save.line(125,457,320,457)
     
     # draw image
-    save.drawImage('tmp/Fig.png', 75, 200, 50, 230)
+    imgdata = BytesIO()
+    fig.savefig(imgdata, format='png')
+    imgdata.seek(0)  # rewind the data
 
+    Image = ImageReader(imgdata)
+    save.drawImage(Image, 75, 200, 450, 230)
 
     # save pdf file
     save.showPage()
@@ -231,8 +237,6 @@ def SaveData():
     
     # remove tmp files
     os.remove(filename)
-
-    os.remove('tmp/Fig.png')
 
 
 #%% Spectrum Conv classes
@@ -607,8 +611,6 @@ class one_energy_window(tk.Frame):
         ax.set_ylabel('kcts')
         ax.set_xlabel('Tagen')
         ax.legend()
-        
-        fig.savefig('tmp/Fig.png', dpi=100)
 
 
 #%% two energy windows
@@ -747,7 +749,7 @@ class two_energy_window(tk.Frame):
         buttonCalc = ttk.Button(self, text="Berechnen", command = self.buttonCalculate_two_windows)
         buttonCalc.pack()
 
-        canvas2 = FigureCanvasTkAgg(fig2, self)
+        canvas2 = FigureCanvasTkAgg(fig, self)
         canvas2.draw()
         canvas2.get_tk_widget().pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True)
 
@@ -943,19 +945,17 @@ class two_energy_window(tk.Frame):
         dt_selen, decay_selen = selen_decay(counts_0d)
 
         ### plot
-        ax2.clear()
+        ax.clear()
     
-        ax2.plot(dt_list, retention_10, label='Retention = 10%')
-        ax2.plot(dt_list, retention_15, label='Retention = 15%')
-        ax2.plot(7., counts_7d, 'o')
-        ax2.annotate('Retention', xy=(7.1, counts_7d))
-        ax2.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
-        ax2.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
-        ax2.set_ylabel('kcts')
-        ax2.set_xlabel('Tagen')
-        ax2.legend()
-        
-        fig2.savefig('tmp/Fig.png', dpi=100)
+        ax.plot(dt_list, retention_10, label='Retention = 10%')
+        ax.plot(dt_list, retention_15, label='Retention = 15%')
+        ax.plot(7., counts_7d, 'o')
+        ax.annotate('Retention', xy=(7.1, counts_7d))
+        ax.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
+        ax.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
+        ax.set_ylabel('kcts')
+        ax.set_xlabel('Tagen')
+        ax.legend()
 
 
 #%% start application
