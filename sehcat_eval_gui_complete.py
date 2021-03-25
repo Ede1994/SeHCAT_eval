@@ -48,13 +48,11 @@ patdata = {'Name': "-",
 	      }
 
 # define figures for GUI
-fig = Figure(figsize=(4, 6), dpi=60)
-ax1 = fig.add_subplot(2,1,1)
-ax2 = fig.add_subplot(2,1,2)
+fig = Figure(figsize=(6, 2), dpi=100)
+ax = fig.add_subplot(1,1,1)
 
-fig2 = Figure(figsize=(4, 6), dpi=60)
-ax3 = fig2.add_subplot(2,1,1)
-ax4 = fig2.add_subplot(2,1,2)
+fig2 = Figure(figsize=(6, 2), dpi=100)
+ax2 = fig2.add_subplot(1,1,1)
 
 
 #%% Functions
@@ -115,14 +113,12 @@ def Help():
     popup.wm_title("Help")
     label = ttk.Label(popup, text=("""Alle Felder entsprechend ausfüllen. Achtung: Angaben in kilo-Counts [kcts]!
 Durch das Betätigen des 'Berechnen!'-Buttons wird die Retention nach 7 Tagen in % ausgegeben!
-1-Energiefenster: Diese Eingabemaske benutzen, wenn nur EIN Energiefenster für die WB genutzt wurde.
-2-Energiefenster: Diese Eingabemaske benutzen, wenn nur ZWEI Energiefenster für die WB genutzt wurde.
+
 
 English:
 Please fill in all fields accordingly. Note: Data in kilo-counts!
 Press the 'Berechnen!'-Button to get the final retention in %.
-One energy window: Use this mask, if only one energy window was set for the WB.
-Two energy windows: Use this mask, if two energy windows were set for the WB."""), font=NORM_FONT)
+"""), font=NORM_FONT)
     label.pack(side="top", fill="x", pady=10)
     B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
     B1.pack()
@@ -224,6 +220,9 @@ def SaveData():
     # sgn area
     save.drawString(30,460, "Unterschrift MPE:")
     save.line(125,457,320,457)
+    
+    # draw image
+    save.drawImage('tmp/Fig.png', 75, 200, 50, 230)
 
 
     # save pdf file
@@ -232,6 +231,8 @@ def SaveData():
     
     # remove tmp files
     os.remove(filename)
+
+    os.remove('tmp/Fig.png')
 
 
 #%% Spectrum Conv classes
@@ -346,16 +347,16 @@ class StartPage(tk.Frame):
         self.entry_pat_date_2nd.grid(row=7, column=1, padx=15)
         
         # buttons energy windows
-        button = ttk.Button(self, text="Laden",
+        button = ttk.Button(self, text="Patientendaten speichern",
                             command = self.load)
         button.pack()
         
         # buttons energy windows
-        button = ttk.Button(self, text="1-Energiefenster",
+        button = ttk.Button(self, text="1-Energiefenster: 137 keV",
                             command = lambda: controller.show_frame(one_energy_window))
         button.pack()
 
-        button2 = ttk.Button(self, text="2-Energiefenster",
+        button2 = ttk.Button(self, text="2-Energiefenster: 137 und 280 keV",
                             command = lambda: controller.show_frame(two_energy_window))
         button2.pack()
     
@@ -378,7 +379,7 @@ class one_energy_window(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = ttk.Label(self, text="1-Energiefenster", font=LARGE_FONT)
+        label = ttk.Label(self, text="1-Energiefenster: 137 keV", font=LARGE_FONT)
         label.pack(pady=10,padx=10)
 
         buttonHome = ttk.Button(self, text="Back",
@@ -595,28 +596,19 @@ class one_energy_window(tk.Frame):
         patdata['Retention 1-Fenster [%]'] = retention_1w
         
         ### plot
-        ax1.clear()
-        ax2.clear()
+        ax.clear()
     
-        #ax1.set_title('kcts vs Tagen')
-        ax1.plot(0, counts_0d, 'o', label='kcts 0d')
-        ax1.plot(7, counts_7d, 'o', label='kcts 7d')
-        ax1.plot(dt_selen, decay_selen, label='physikalischer Zerfall Se-75')
-        ax1.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
-        ax1.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
-        ax1.set_ylabel('kcts')
-        ax1.set_xlabel('Tagen')
-        ax1.legend()
-    
-        ax2.plot(dt_list, retention_10, label='Retention = 10%')
-        ax2.plot(dt_list, retention_15, label='Retention = 15%')
-        ax2.plot(7., counts_7d, 'o')
-        ax2.annotate('Retention', xy=(dt_list[-3], retention_1w), )
-        ax2.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
-        ax2.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
-        ax2.set_ylabel('kcts')
-        ax2.set_xlabel('Tagen')
-        ax2.legend()
+        ax.plot(dt_list, retention_10, label='Retention = 10%')
+        ax.plot(dt_list, retention_15, label='Retention = 15%')
+        ax.plot(7., counts_7d, 'o')
+        ax.annotate('Retention', xy=(7.1, counts_7d))
+        ax.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
+        ax.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
+        ax.set_ylabel('kcts')
+        ax.set_xlabel('Tagen')
+        ax.legend()
+        
+        fig.savefig('tmp/Fig.png', dpi=100)
 
 
 #%% two energy windows
@@ -633,7 +625,7 @@ class two_energy_window(tk.Frame):
         buttonHome.pack()
         
         ### entries
-        group_2 = tk.LabelFrame(self, text="2-Energiefenster")
+        group_2 = tk.LabelFrame(self, text="2-Energiefenster: 137 und 280 keV")
         group_2.pack()
 
         # background
@@ -951,28 +943,19 @@ class two_energy_window(tk.Frame):
         dt_selen, decay_selen = selen_decay(counts_0d)
 
         ### plot
-        ax3.clear()
-        ax4.clear()
+        ax2.clear()
     
-        #ax3.set_title('kcts vs Tagen')
-        ax3.plot(0, counts_0d, 'o', label='kcts 0d')
-        ax3.plot(7, counts_7d, 'o', label='kcts 7d')
-        ax3.plot(dt_selen, decay_selen, label='physikalischer Zerfall Se-75')
-        ax3.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
-        ax3.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
-        ax3.set_ylabel('kcts')
-        ax3.set_xlabel('Tagen')
-        ax3.legend()
-    
-        ax4.plot(dt_list, retention_10, label='Retention = 10%')
-        ax4.plot(dt_list, retention_15, label='Retention = 15%')
-        ax4.plot(7., counts_7d, 'o')
-        ax4.annotate('Retention', xy=(dt_list[-3], retention_2w), )
-        ax4.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
-        ax4.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
-        ax4.set_ylabel('kcts')
-        ax4.set_xlabel('Tagen')
-        ax4.legend()
+        ax2.plot(dt_list, retention_10, label='Retention = 10%')
+        ax2.plot(dt_list, retention_15, label='Retention = 15%')
+        ax2.plot(7., counts_7d, 'o')
+        ax2.annotate('Retention', xy=(7.1, counts_7d))
+        ax2.axvline(x = 0, color='red', linestyle='--', linewidth='0.33')
+        ax2.axvline(x = 7, color='red', linestyle='--', linewidth='0.33')
+        ax2.set_ylabel('kcts')
+        ax2.set_xlabel('Tagen')
+        ax2.legend()
+        
+        fig2.savefig('tmp/Fig.png', dpi=100)
 
 
 #%% start application
