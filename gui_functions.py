@@ -71,10 +71,10 @@ This program is free software."""), font=NORM_FONT)
 # read dcm header to dictionary
 def dcm2header(filename, patdata):
     dcm_header = pydicom.dcmread(filename)
-    patdata['Name'] = dcm_header[0x0054, 0x0400][0:]
-    patdata['Birthday'] = dcm_header[0x0010, 0x0030][0:]
-    patdata['Height'] = dcm_header[0x0010, 0x1020][0:]
-    patdata['Weight'] = dcm_header[0x0010, 0x1030][0:]
+    patdata['Name'] = str(dcm_header[0x0054, 0x0400].value)
+    patdata['Birthday'] = str(dcm_header[0x0010, 0x0030].value[6:8] + '.' + dcm_header[0x0010, 0x0030].value[4:6] + '.' + dcm_header[0x0010, 0x0030].value[0:4])
+    patdata['Height'] = str(float(dcm_header[0x0010, 0x1020].value)*100)
+    patdata['Weight'] = str(dcm_header[0x0010, 0x1030].value)
 
 
 # read dcm data to numpy array

@@ -188,6 +188,11 @@ class StartPage(tk.Frame):
         filename = str(file.name)
 
         dcm2header(filename, patdata)
+        
+        self.entry_patname.insert(0, patdata['Name'])
+        self.entry_patbirth.insert(0, patdata['Birthday'])
+        self.entry_patheight.insert(0, patdata['Height'])
+        self.entry_patweight.insert(0, patdata['Weight'])
 
     
     # store patient infos in dic
