@@ -18,13 +18,21 @@ It's recommended to use a Python environment like Anaconda. After installation y
 
 
 # Windows
-For convert in .exe-file: use auto-py-to-exe (or pyinstaller directly) in Prompt shell. If you want to see possible error messages, you must create a console based file.
-
+For convert in .exe-file: use auto-py-to-exe (or pyinstaller directly) in Prompt shell. If you want to see possible error messages, you must create a console based file. Make sure that all dependencies are up to date:
+```
+$ pip install --user --upgrade pip
+$ pip install --user --upgrade pyinstaller
+$ pip install --user --upgrade auto-py-to-exe
+```
+It is recommended to use pyinstaller.
+```
+$ pyinstaller --onedir sehcat_eval_gui_complete.py functions.py gui_functions.py
+```
 
 # Ubuntu
 It is recommended to use pyinstaller.
 
 ```
 $ pip install pyinstaller
-$ pyinstaller --onefile --windowed --name "SeHCAT" sehcat_eval_gui_complete.py
+$ pyinstaller --onedir sehcat_eval_gui_complete.py functions.py gui_functions.py
 ```
