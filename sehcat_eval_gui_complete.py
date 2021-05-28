@@ -12,15 +12,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 
-import os
-import numpy as np
-import math
-import pydicom
-
-from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib.utils import ImageReader
+from functions import selen_decay, retention_lists, retention_1w_calc, retention_2w_calc
+from gui_functions import popupmsg, Help, Impressum, dcm2header, dcm2data, SaveData
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -56,189 +49,6 @@ ax = fig.add_subplot(1,1,1)
 # fig2 = Figure(figsize=(6, 2), dpi=100)
 # ax2 = fig2.add_subplot(1,1,1)
 
-
-#%% Functions
-
-# describe the physical decay of radioactivity
-def decay_equation(a0,T,t):
-	# A = A0 * e^(- λ * t)
-	a = int(a0 * math.exp(-math.log(2)/T * t))
-	return a
-
-# calculate physical decay of Se-75
-def selen_decay(counts_0d):
-    dt = 0.0
-    dt_list = []
-    decay =  []
-    while dt <= 8.0:
-        x = decay_equation(counts_0d, T_75se, dt)
-        decay.append(x)
-        dt_list.append(dt)
-        dt += 0.1
-    return dt_list, decay
-
-# calculate 10% and 15% retentions curve
-def retention_lists(counts_0d):
-    retention_10 = []
-    retention_15 = []
-    dt = 0.0
-    dt_list = []
-    factor1 = 1.
-    factor2 = 1.
-    while dt <= 8.0:
-        x = decay_equation(counts_0d, T_75se, dt)*factor1
-        factor1 -= factor1*0.15
-        y = decay_equation(counts_0d, T_75se, dt)*factor2
-        factor2 -= factor2*0.125
-        retention_10.append(x)
-        retention_15.append(y)
-        dt_list.append(dt)
-        dt += 0.5
-    return dt_list, retention_10, retention_15
-
-
-#%% Functions for GUI
-
-# popupmsg as place holder
-def popupmsg(msg):
-    popup = tk.Tk()
-    popup.wm_title("!")
-    label = ttk.Label(popup, text=msg, font=NORM_FONT)
-    label.pack(side="top", fill="x", pady=10)
-    B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
-    B1.pack()
-    popup.mainloop()
-
-# some help instructions
-def Help():
-    popup = tk.Tk()
-    popup.wm_title("Help")
-    label = ttk.Label(popup, text=("""Alle Felder entsprechend ausfüllen. Achtung: Angaben in kilo-Counts [kcts]!
-Durch das Betätigen des 'Berechnen!'-Buttons wird die Retention nach 7 Tagen in % ausgegeben!
-
-
-English:
-Please fill in all fields accordingly. Note: Data in kilo-counts!
-Press the 'Berechnen!'-Button to get the final retention in %.
-"""), font=NORM_FONT)
-    label.pack(side="top", fill="x", pady=10)
-    B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
-    B1.pack()
-    popup.mainloop()
-
-# impressum message
-def Impressum():
-    popup = tk.Tk()
-    popup.wm_title("Impressum")
-    label = ttk.Label(popup, text=("""Author: Eric Einspänner (Clinic for Radiology and Nuclear Medicine, UMMD Magdeburg (Germany))
-Contact: eric.einspaenner@med.ovgu.de
-GitHub: https://github.com/Ede1994/SeHCAT_eval
-
-This program is free software."""), font=NORM_FONT)
-    label.pack(side="top", fill="x", pady=10)
-    B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
-    B1.pack()
-    popup.mainloop()
-
-# 
-def dcm2data(filename):
-    # read dicom file
-    dcm_file = pydicom.read_file(filename)
-
-    # convert to array
-    np_pixel_array = dcm_file.pixel_array
-        
-    ant_w1 = float(np.sum(np_pixel_array[0]) / 1000)
-    post_w1 = float(np.sum(np_pixel_array[1]) / 1000)
-    ant_w2 = float(np.sum(np_pixel_array[2]) / 1000)
-    post_w2 = float(np.sum(np_pixel_array[3]) / 1000)
-    
-    return ant_w1, post_w1, ant_w2, post_w2
-
-
-# save button; pdf printout
-def SaveData():    
-    # open dialog
-    file = filedialog.asksaveasfile(title="Save As...", filetypes=[("All files", "*.*")])
-
-    #  asksaveasfile return `None` if dialog closed with "cancel". 
-    if file is None:
-        return
-
-    # extract filename as str
-    filename = str(file.name)
-    
-    file.close()
-    
-    #create pdf File and define settings
-    save = canvas.Canvas(filename + '.pdf', pagesize=letter)
-    save.setLineWidth(.3)
-    save.setFont('Helvetica', 12)
-
-    
-    # pdf header
-    save.drawString(30,750, 'Universitätsmedizin Magdeburg')
-    save.drawString(30,735, 'Klinik für Radiologie und Nuklearmedizin')
-    save.drawString(440,750, "Datum:")
-    save.line(480,747,580,747)
-    
-    save.drawString(30,700,'Protokoll für SeHCAT Evaluierung')
-    save.line(30,698,580,698)
-
-    # patient infos
-    save.drawString(30,680, '1. Messung:')
-    save.drawString(100,680, str(patdata['1st Measurement']))
-    save.drawString(320,680, '2. Messung:')
-    save.drawString(390,680, str(patdata['2nd Measurement']))
-  
-    save.drawString(30,630, 'Patienteninformationen:')
-    
-    save.drawString(30,610, 'Name:')
-    save.drawString(100,610, str(patdata['Name']))
-    save.drawString(320,610, 'Geburtsdatum:')
-    save.drawString(420,610, str(patdata['Birthday']))
-    
-    save.drawString(30,590, 'Größe [cm]:')
-    save.drawString(100,590, str(patdata['Height']))
-    save.drawString(320,590, 'Gewicht [kg]:')
-    save.drawString(420,590, str(patdata['Weight']))
-
-    save.drawString(30,565, 'appl. Aktivität [kBq]:')
-    save.drawString(150,565, str(patdata['Applied Activity [kBq]']))
-    save.drawString(320,565, 'App.-zeitpunkt:')
-    save.drawString(420,565, str(patdata['Application Date']))
-
-    save.line(30,547,580,547)
-    
-    # results
-    save.drawString(30,530, 'Ergebnis 1-Energiefenster:')
-    save.drawString(30,510, 'Retention [%]:')
-    save.drawString(150,510, str(patdata['Retention 1-Fenster [%]']))
-
-    save.drawString(350,530, 'Ergebnis 2-Energiefenster:')
-    save.drawString(350,510, 'Retention [%]:')
-    save.drawString(470,510, str(patdata['Retention 2-Fenster [%]']))
-    
-    # sgn area
-    save.drawString(30,460, "Unterschrift MPE:")
-    save.line(125,457,320,457)
-    
-    # draw image
-    imgdata = BytesIO()
-    fig.savefig(imgdata, format='png')
-    imgdata.seek(0)  # rewind the data
-
-    Image = ImageReader(imgdata)
-    save.drawImage(Image, 75, 200, 450, 230)
-
-    # save pdf file
-    save.showPage()
-    save.save()
-    
-    # remove tmp files
-    os.remove(filename)
-
-
 #%% Spectrum Conv classes
 
 ### constructor app
@@ -248,7 +58,7 @@ class SeHCAT_eval(tk.Tk):
         
         tk.Tk.__init__(self, *args, **kwargs)
 
-        tk.Tk.iconbitmap(self,default="tmp/nuclear.ico")
+        #tk.Tk.iconbitmap(self,default="tmp/nuclear.ico")
         tk.Tk.wm_title(self, "SeHCAT Eval")
         tk.Tk.geometry(self, "1600x1400")
 
@@ -264,7 +74,7 @@ class SeHCAT_eval(tk.Tk):
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Import...", command = lambda: popupmsg("Not supported just yet!"))
         filemenu.add_separator()
-        filemenu.add_command(label="Speichern als...", command = SaveData)
+        filemenu.add_command(label="Speichern als...", command = lambda: SaveData(fig, patdata))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command = container.quit)
         menubar.add_cascade(label="File", menu = filemenu)
@@ -349,8 +159,13 @@ class StartPage(tk.Frame):
         self.label_pat_date_2nd = tk.Label(group_patient, text="2. Messung:").grid(row=7)
         self.entry_pat_date_2nd = tk.Entry(group_patient)
         self.entry_pat_date_2nd.grid(row=7, column=1, padx=15)
+
+        # button load dicom header
+        button = ttk.Button(self, text="Patientendaten laden",
+                            command = self.buttonImport_Header)
+        button.pack()
         
-        # buttons energy windows
+        # button save patdata
         button = ttk.Button(self, text="Patientendaten speichern",
                             command = self.load)
         button.pack()
@@ -363,6 +178,22 @@ class StartPage(tk.Frame):
         button2 = ttk.Button(self, text="2-Energiefenster: 137 und 280 keV",
                             command = lambda: controller.show_frame(two_energy_window))
         button2.pack()
+
+    ### Load Buttons
+    def buttonImport_Header(self):
+        # open dialog
+        file = filedialog.askopenfile(title="Load data...", mode='r', filetypes=[("All files", "*.*")])
+
+        # extract filename as str
+        filename = str(file.name)
+
+        dcm2header(filename, patdata)
+        
+        self.entry_patname.insert(0, patdata['Name'])
+        self.entry_patbirth.insert(0, patdata['Birthday'])
+        self.entry_patheight.insert(0, patdata['Height'])
+        self.entry_patweight.insert(0, patdata['Weight'])
+
     
     # store patient infos in dic
     def load(self):
@@ -586,14 +417,13 @@ class one_energy_window(tk.Frame):
             post_counts_7d = float(post_counts_7d)
 
         ### retention
-        retention_1w = round(decay_factor * (np.sqrt((ant_counts_7d - background_7d_ant)*(post_counts_7d - background_7d_post)) \
-                                          / np.sqrt((ant_counts_0d - background_0d_ant)*(post_counts_0d - background_0d_post))) * 100., 2)
+        retention_1w = retention_1w_calc(decay_factor, ant_counts_0d, ant_counts_7d, background_0d_ant, background_7d_ant, post_counts_0d, post_counts_7d, background_0d_post, background_7d_post)
     
         counts_0d = ((ant_counts_0d - background_0d_ant) + (post_counts_0d - background_0d_post)) / 2.
         counts_7d = ((ant_counts_7d - background_7d_ant)  + (post_counts_7d - background_7d_post)) / 2.
     
-        dt_list, retention_10, retention_15 = retention_lists(counts_0d)
-        dt_selen, decay_selen = selen_decay(counts_0d)
+        dt_list, retention_10, retention_15 = retention_lists(counts_0d, T_75se)
+        dt_selen, decay_selen = selen_decay(counts_0d, T_75se)
 
         ### results; add in label areas
         self.label_areaRetention_1.config(text=str(retention_1w))
@@ -931,8 +761,7 @@ class two_energy_window(tk.Frame):
             post_counts_7d_window2 = float(post_counts_7d_window2)
 
         ### retention = (window1 + window2)/2 (round -> .00)
-        retention_2w = round(decay_factor * (np.sqrt((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2)*(post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2))) \
-                      / np.sqrt((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2)*(post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) * 100., 2)
+        retention_2w = retention_2w_calc(decay_factor, ant_counts_0d_window1, ant_counts_0d_window2, ant_counts_7d_window1, ant_counts_7d_window2, background_0d_ant_w1, background_0d_ant_w2, background_7d_ant_w1, background_7d_ant_w2, post_counts_0d_window1, post_counts_0d_window2, post_counts_7d_window1, post_counts_7d_window2, background_0d_post_w1, background_0d_post_w2, background_7d_post_w1, background_7d_post_w2)
 
         counts_0d = ((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2) + (post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) / 2.
         counts_7d = ((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2) + (post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2)) / 2.
@@ -941,8 +770,8 @@ class two_energy_window(tk.Frame):
         self.label_areaRetention_2.config(text=str(retention_2w))
         patdata['Retention 2-Fenster [%]'] = retention_2w
     
-        dt_list, retention_10, retention_15 = retention_lists(counts_0d)
-        dt_selen, decay_selen = selen_decay(counts_0d)
+        dt_list, retention_10, retention_15 = retention_lists(counts_0d, T_75se)
+        dt_selen, decay_selen = selen_decay(counts_0d, T_75se)
 
         ### plot
         ax.clear()
