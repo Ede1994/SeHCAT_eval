@@ -46,8 +46,6 @@ patdata = {'Name': "-",
 fig = Figure(figsize=(6, 2), dpi=100)
 ax = fig.add_subplot(1,1,1)
 
-# fig2 = Figure(figsize=(6, 2), dpi=100)
-# ax2 = fig2.add_subplot(1,1,1)
 
 #%% Spectrum Conv classes
 
