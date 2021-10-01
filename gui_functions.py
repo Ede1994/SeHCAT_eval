@@ -11,12 +11,16 @@ from tkinter import filedialog
 import os
 import pydicom
 import numpy as np
+from datetime import date
 
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 
+
+# get today's date
+today = date.today().strftime("%d/%m/%Y")
 
 ### Fonts
 LARGE_FONT= ("Verdana", 12)
@@ -117,6 +121,7 @@ def SaveData(fig, patdata):
     save.drawString(30,750, 'Universitätsmedizin Magdeburg')
     save.drawString(30,735, 'Klinik für Radiologie und Nuklearmedizin')
     save.drawString(440,750, "Datum:")
+    save.drawString(480,750, str(today))
     save.line(480,747,580,747)
     
     save.drawString(30,700,'Protokoll für SeHCAT Evaluierung')
@@ -157,8 +162,8 @@ def SaveData(fig, patdata):
     save.drawString(470,510, str(patdata['Retention 2-Fenster [%]']))
     
     # sgn area
-    save.drawString(30,460, "Unterschrift MPE:")
-    save.line(125,457,320,457)
+    #save.drawString(30,460, "Unterschrift MPE:")
+    #save.line(125,457,320,457)
     
     # draw image
     imgdata = BytesIO()
