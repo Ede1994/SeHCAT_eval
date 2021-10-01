@@ -166,12 +166,12 @@ def SaveData(fig, patdata):
     #save.line(125,457,320,457)
     
     # draw image
-    #imgdata = BytesIO()
-    #fig.savefig(imgdata, format='png')
-    #imgdata.seek(0)  # rewind the data
+    imgdata = BytesIO()
+    fig.savefig(imgdata, format='png')
+    imgdata.seek(0)  # rewind the data
 
-    #Image = ImageReader(imgdata)
-    #save.drawImage(Image, 75, 200, 450, 230)
+    Image = ImageReader(imgdata)
+    save.drawImage(Image, 75, 200, 450, 230)
 
     # save pdf file
     save.showPage()

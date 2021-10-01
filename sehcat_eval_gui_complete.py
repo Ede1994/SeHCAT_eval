@@ -761,8 +761,8 @@ class two_energy_window(tk.Frame):
         ### retention = (window1 + window2)/2 (round -> .00)
         retention_2w = retention_2w_calc(decay_factor, ant_counts_0d_window1, ant_counts_0d_window2, ant_counts_7d_window1, ant_counts_7d_window2, background_0d_ant_w1, background_0d_ant_w2, background_7d_ant_w1, background_7d_ant_w2, post_counts_0d_window1, post_counts_0d_window2, post_counts_7d_window1, post_counts_7d_window2, background_0d_post_w1, background_0d_post_w2, background_7d_post_w1, background_7d_post_w2)
 
-        counts_0d = ((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2) + (post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) / 2.
-        counts_7d = ((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2) + (post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2)) / 2.
+        counts_0d = ((ant_counts_0d_window1 + ant_counts_0d_window2 - background_0d_ant_w1 - background_0d_ant_w2) + (post_counts_0d_window1 + post_counts_0d_window2 - background_0d_post_w1 - background_0d_post_w2)) #/ 2.
+        counts_7d = ((ant_counts_7d_window1 + ant_counts_7d_window2 - background_7d_ant_w1 - background_7d_ant_w2) + (post_counts_7d_window1 + post_counts_7d_window2 - background_7d_post_w1 - background_7d_post_w2)) #/ 2.
         
         ### results; add in label areas
         self.label_areaRetention_2.config(text=str(retention_2w))
