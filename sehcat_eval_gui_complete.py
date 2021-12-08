@@ -56,7 +56,7 @@ class SeHCAT_eval(tk.Tk):
         
         tk.Tk.__init__(self, *args, **kwargs)
 
-        #tk.Tk.iconbitmap(self,default="tmp/nuclear.ico")
+        tk.Tk.iconbitmap(self,default="tmp/nuclear.ico")
         tk.Tk.wm_title(self, "SeHCAT Eval")
         tk.Tk.geometry(self, "1600x1400")
 
