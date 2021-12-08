@@ -29,6 +29,19 @@ It is recommended to use pyinstaller.
 $ pyinstaller --onedir sehcat_eval_gui_complete.py functions.py gui_functions.py
 ```
 
+Alternative:
+Use `cx_freezer` for the creation of the build or a installation dist. You can find the example `setup.py` in the main folder.
+```
+python setup.py build
+or
+python setup.py bdist_msi
+```
+It is recommended to use a virtual environment with just the necessary packages.
+
+
+# Troubleshooting
+If the application doesn't start, then it is recommended to run the bash file `start.bat` so that the error message appears in the console.
+
 # Ubuntu
 It is recommended to use pyinstaller.
 
